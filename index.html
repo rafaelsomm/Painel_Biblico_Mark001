@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0E7490" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Painel Bíblico — Estudo, Devocional &amp; Conselheiro</title>
+  <title>Portal do Membro Cristão — Estudo, Devocional &amp; Conselheiro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -38,7 +38,7 @@
   </script>
   <style>
     html, body {
-      overflow-x: hidden;
+      overflow-x: clip;
       max-width: 100%;
     }
     body {
@@ -125,7 +125,8 @@
     body.dark #settings-modal > div,
     body.dark #edit-member-modal > div,
     body.dark #cargos-modal > div,
-    body.dark #sos-modal > div {
+    body.dark #sos-modal > div,
+    body.dark #welcome-tour-modal > div {
       background-color: #1E293B !important;
       border-color: #334155 !important;
       color: #E2E8F0 !important;
@@ -210,67 +211,72 @@
     body.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
 </head>
-<body class="font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
+<body class="font-sans antialiased min-h-screen flex flex-col">
 
   <!-- TOP FIXED HEADER -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
-    <div class="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
       <!-- Brand -->
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-10 h-10 rounded-xl bg-[#0E7490] text-white flex items-center justify-center shrink-0 shadow-sm">
           <i data-lucide="book-open" class="w-5 h-5"></i>
         </div>
         <div class="min-w-0">
-          <h1 class="text-base sm:text-lg font-bold text-[#0E7490] truncate leading-tight">Painel Bíblico</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">Almeida Corrigida Fiel • Estudo, Devocional, Aconselhamento, Agenda, Aniversários e Compromissos</p>
+          <h1 class="text-base sm:text-lg font-bold text-[#0E7490] truncate leading-tight">Portal do Membro Cristão</h1>
+          <p class="text-[11px] text-slate-500 hidden sm:block truncate max-w-[220px] md:max-w-xs xl:max-w-md" title="Almeida Corrigida Fiel • Estudo, Devocional, Aconselhamento, Agenda, Aniversários e Compromissos">Almeida Corrigida Fiel • Estudo, Devocional, Aconselhamento, Agenda, Aniversários e Compromissos</p>
         </div>
       </div>
 
       <!-- Status, Clock & Actions -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
         <!-- Cloud Sync Status -->
-        <div id="cloud-sync-badge" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-semibold" title="Status da sincronização na nuvem (Firebase)">
+        <div id="cloud-sync-badge" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-semibold whitespace-nowrap shrink-0" title="Status da sincronização na nuvem (Firebase)">
           <span id="cloud-sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
           <span id="cloud-sync-text">Conectando...</span>
         </div>
 
         <!-- Streak Badge -->
-        <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold" title="Sequência atual de leitura diária">
-          <i data-lucide="flame" class="w-4 h-4 text-emerald-600"></i>
+        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold whitespace-nowrap shrink-0" title="Sequência atual de leitura diária">
+          <i data-lucide="flame" class="w-3.5 h-3.5 text-emerald-600"></i>
           <span id="header-streak">0 dias seguidos</span>
         </div>
 
         <!-- Clock & Date -->
-        <div class="hidden lg:flex flex-col items-end text-right leading-tight px-2 border-r border-slate-200">
+        <div class="hidden xl:flex flex-col items-end text-right leading-tight px-2 border-r border-slate-200 whitespace-nowrap shrink-0">
           <span id="live-clock" class="text-sm font-semibold text-slate-800 tabular-nums">--:--:--</span>
           <span id="live-date" class="text-[11px] text-slate-500 capitalize">---</span>
         </div>
 
+        <!-- Help / Tour Button -->
+        <button id="help-tour-btn" onclick="openWelcomeTour(true)" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer shrink-0" title="Guia Rápido: Como usar o portal">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+        </button>
+
         <!-- Dark Mode Toggle -->
-        <button id="theme-toggle-btn" onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer" title="Alternar Modo Claro / Escuro">
+        <button id="theme-toggle-btn" onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer shrink-0" title="Alternar Modo Claro / Escuro">
           <i id="theme-toggle-icon" data-lucide="moon" class="w-4 h-4"></i>
         </button>
 
         <!-- SOS Espiritual -->
-        <button onclick="openSosModal()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#EF4444] hover:bg-red-600 text-white text-xs sm:text-sm font-semibold shadow-sm transition cursor-pointer shrink-0">
+        <button onclick="openSosModal()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#EF4444] hover:bg-red-600 text-white text-xs sm:text-sm font-semibold shadow-sm transition cursor-pointer shrink-0 whitespace-nowrap">
           <i data-lucide="heart-pulse" class="w-4 h-4"></i>
           <span class="sm:hidden">SOS</span>
           <span class="hidden sm:inline">SOS Espiritual</span>
         </button>
 
         <!-- Backup / Settings (ADM only) -->
-        <button id="header-settings-btn" onclick="openSettingsModal()" class="hidden p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer" title="Backup JSON e Configurações">
+        <button id="header-settings-btn" onclick="openSettingsModal()" class="hidden p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer shrink-0" title="Backup JSON e Configurações">
           <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
 
         <!-- User Badge & Logout -->
-        <div id="header-user-area" class="hidden items-center gap-2 pl-2 border-l border-slate-200">
-          <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-50 border border-cyan-200 text-[#0E7490] text-xs font-semibold">
+        <div id="header-user-area" class="hidden items-center gap-1.5 pl-2 border-l border-slate-200 shrink-0">
+          <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-50 border border-cyan-200 text-[#0E7490] text-xs font-semibold whitespace-nowrap">
             <i data-lucide="user" class="w-3.5 h-3.5"></i>
             <span id="header-user-name">Usuário</span>
             <span id="header-adm-badge" class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded bg-indigo-600 text-white">ADM</span>
           </div>
-          <button onclick="logoutUser()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-600 text-xs font-semibold transition cursor-pointer" title="Sair / Trocar de usuário">
+          <button onclick="logoutUser()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-600 text-xs font-semibold transition cursor-pointer whitespace-nowrap" title="Sair / Trocar de usuário">
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Sair</span>
           </button>
@@ -281,43 +287,43 @@
 
   <!-- NAVIGATION TABS -->
   <nav id="nav-tabs-bar" class="bg-white border-b border-slate-200 sticky top-16 z-30">
-    <div class="w-full px-4 sm:px-6 lg:px-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
-      <button data-tab="overview" onclick="switchTab('overview')" class="tab-btn active flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-start lg:justify-center gap-1 overflow-x-auto no-scrollbar">
+      <button data-tab="overview" onclick="switchTab('overview')" class="tab-btn active flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
         <span>Visão Geral</span>
       </button>
-      <button data-tab="counselor" onclick="switchTab('counselor')" class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="compass" class="w-4 h-4"></i>
-        <span>Conselheiro Bíblico</span>
+      <button data-tab="counselor" onclick="switchTab('counselor')" class="tab-btn flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+        <span>Conselheiro</span>
         <span id="badge-counselor" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-cyan-100 text-[#0E7490]">30+</span>
       </button>
-      <button data-tab="reader" onclick="switchTab('reader')" class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="book-open-text" class="w-4 h-4"></i>
-        <span>Leitura da Bíblia (ACF)</span>
+      <button data-tab="reader" onclick="switchTab('reader')" class="tab-btn flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="book-open-text" class="w-3.5 h-3.5"></i>
+        <span>Bíblia (ACF)</span>
         <span id="badge-favorites" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-700">0 fav</span>
       </button>
-      <button data-tab="plan" onclick="switchTab('plan')" class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="list-checks" class="w-4 h-4"></i>
+      <button data-tab="plan" onclick="switchTab('plan')" class="tab-btn flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
         <span>Plano Diário</span>
         <span id="badge-plan" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-100 text-emerald-700">0%</span>
       </button>
-      <button data-tab="agenda" onclick="switchTab('agenda')" class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="calendar-heart" class="w-4 h-4"></i>
+      <button data-tab="agenda" onclick="switchTab('agenda')" class="tab-btn flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="calendar-heart" class="w-3.5 h-3.5"></i>
         <span>Agenda &amp; Hábitos</span>
         <span id="badge-agenda" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-blue-100 text-blue-700">0 hoje</span>
       </button>
-      <button data-tab="events" onclick="switchTab('events')" class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="party-popper" class="w-4 h-4"></i>
+      <button data-tab="events" onclick="switchTab('events')" class="tab-btn flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="party-popper" class="w-3.5 h-3.5"></i>
         <span>Eventos &amp; Aniversários</span>
         <span id="badge-events-upcoming" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-800">0</span>
       </button>
-      <button id="nav-tab-members" data-tab="members" onclick="switchTab('members')" class="tab-btn hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-[#0E7490] hover:text-[#155E75] whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="users" class="w-4 h-4"></i>
+      <button id="nav-tab-members" data-tab="members" onclick="switchTab('members')" class="tab-btn hidden flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-[#0E7490] hover:text-[#155E75] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="users" class="w-3.5 h-3.5"></i>
         <span>Membros &amp; Cargos</span>
         <span id="badge-members-dir" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-cyan-100 text-[#0E7490]">0</span>
       </button>
-      <button id="nav-tab-admin" data-tab="admin" onclick="switchTab('admin')" class="tab-btn hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-indigo-700 hover:text-indigo-900 whitespace-nowrap transition cursor-pointer">
-        <i data-lucide="shield-check" class="w-4 h-4"></i>
+      <button id="nav-tab-admin" data-tab="admin" onclick="switchTab('admin')" class="tab-btn hidden flex items-center gap-1 px-2.5 py-2.5 text-xs font-medium text-indigo-700 hover:text-indigo-900 whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
         <span>Painel ADM</span>
         <span id="badge-admin-members" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-100 text-indigo-700">0</span>
       </button>
@@ -325,7 +331,7 @@
   </nav>
 
   <!-- MAIN CONTENT CONTAINER -->
-  <main class="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
     <!-- ==================== TAB 1: VISÃO GERAL ==================== -->
     <section id="tab-overview" class="tab-panel space-y-6">
@@ -1459,7 +1465,7 @@
 
   <!-- FOOTER -->
   <footer id="footer-bar" class="border-t border-slate-200 bg-white py-4 px-4 text-center text-xs text-slate-500">
-    Painel Bíblico • Dados sincronizados na nuvem (Firebase) e cache local • Tradução Almeida Corrigida Fiel
+    Portal do Membro Cristão • Dados sincronizados na nuvem (Firebase) e cache local • Tradução Almeida Corrigida Fiel
   </footer>
 
   <!-- ==================== MODAL: SOS ESPIRITUAL ==================== -->
@@ -1705,6 +1711,64 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL: GUIA DE BOAS-VINDAS / TOUR ==================== -->
+  <div id="welcome-tour-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
+      <!-- Top Banner -->
+      <div class="p-5 bg-gradient-to-r from-[#0E7490] to-cyan-700 text-white flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="tour-step-icon-wrap" class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <span id="tour-role-pill" class="inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-white/20 mb-0.5">Guia do Membro</span>
+            <h2 id="tour-step-title" class="text-base font-bold truncate">Bem-vindo ao Portal!</h2>
+          </div>
+        </div>
+        <button onclick="closeWelcomeTour()" class="p-1.5 rounded-lg hover:bg-white/20 cursor-pointer shrink-0" title="Fechar guia"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <!-- Informative Balloon Body -->
+      <div class="p-5 sm:p-6 space-y-4">
+        <div class="relative p-4 rounded-2xl bg-cyan-50/70 border border-cyan-200">
+          <div class="flex items-start gap-3">
+            <span id="tour-step-emoji" class="text-2xl shrink-0">👋</span>
+            <div class="space-y-1.5 min-w-0">
+              <p id="tour-step-desc" class="text-sm text-slate-700 leading-relaxed"></p>
+              <p id="tour-step-tip" class="text-xs font-semibold text-[#0E7490]"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step Indicators -->
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span id="tour-step-counter" class="font-semibold">Passo 1 de 5</span>
+          <div id="tour-step-dots" class="flex items-center gap-1.5"></div>
+        </div>
+
+        <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
+          <input id="tour-dont-show" type="checkbox" checked class="w-4 h-4 accent-[#0E7490] rounded" />
+          <span>Não mostrar automaticamente nos próximos logins</span>
+        </label>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+          <button id="tour-prev-btn" onclick="prevTourStep()" class="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+            ← Anterior
+          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="closeWelcomeTour()" class="px-3 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer">
+              Pular
+            </button>
+            <button id="tour-next-btn" onclick="nextTourStep()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-[#0E7490] hover:bg-[#155E75] text-white cursor-pointer">
+              Próximo →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== AUTHENTICATION OVERLAY ==================== -->
   <div id="auth-overlay" class="fixed inset-0 z-50 bg-[#F8FAFC] flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-xl border border-slate-200 space-y-6">
@@ -1712,18 +1776,8 @@
         <div class="w-12 h-12 rounded-2xl bg-[#0E7490] text-white flex items-center justify-center mx-auto shadow-sm">
           <i data-lucide="book-open" class="w-6 h-6"></i>
         </div>
-        <h2 class="text-xl font-bold text-[#0E7490]">Painel Bíblico</h2>
-        <p class="text-xs text-slate-500">Acesse sua conta pessoal ou crie uma nova para salvar seu progresso, orações e anotações.</p>
-      </div>
-
-      <!-- Auth Tabs -->
-      <div class="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl">
-        <button id="auth-tab-login" onclick="switchAuthMode('login')" class="py-2 text-xs font-bold rounded-lg bg-white text-[#0E7490] shadow-sm transition cursor-pointer">
-          Entrar
-        </button>
-        <button id="auth-tab-register" onclick="switchAuthMode('register')" class="py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition cursor-pointer">
-          Criar Conta
-        </button>
+        <h2 class="text-xl font-bold text-[#0E7490]">Portal do Membro Cristão</h2>
+        <p class="text-xs text-slate-500">Acesse sua conta pessoal para salvar seu progresso, orações e anotações, além de acompanhar a agenda e os compromissos da igreja.</p>
       </div>
 
       <!-- Error Alert -->
@@ -1746,38 +1800,10 @@
         </button>
       </form>
 
-      <!-- Register Form -->
-      <form id="register-form" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nome completo ou Apelido</label>
-          <input id="reg-name" type="text" required placeholder="Ex: Maria Silva"
-            class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7490]/30 focus:border-[#0E7490]" />
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Usuário (para login)</label>
-          <input id="reg-username" type="text" required minlength="3" placeholder="Ex: mariasilva (sem espaços)"
-            class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7490]/30 focus:border-[#0E7490]" />
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Senha pessoal</label>
-            <input id="reg-password" type="password" required minlength="4" placeholder="Mín. 4 caracteres"
-              class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7490]/30 focus:border-[#0E7490]" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Confirmar senha</label>
-            <input id="reg-password2" type="password" required minlength="4" placeholder="Repita a senha"
-              class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7490]/30 focus:border-[#0E7490]" />
-          </div>
-        </div>
-        <button type="submit" class="w-full py-2.5 bg-[#10B981] hover:bg-emerald-600 text-white text-sm font-semibold rounded-xl shadow-sm transition cursor-pointer">
-          Criar Conta e Acessar
-        </button>
-      </form>
-
-      <p class="text-[11px] text-center text-slate-400">
-        Cada conta possui dados isolados e salvos localmente neste navegador.
-      </p>
+      <div class="text-[11px] text-center text-slate-400 space-y-1">
+        <p>Cada conta possui dados isolados e salvos seguro</p>
+        <p class="font-medium text-slate-500">Feito por Rafael Cavalcante</p>
+      </div>
     </div>
   </div>
 
@@ -2574,46 +2600,17 @@
       cloudWriteShared('users', map);
     }
 
-    function switchAuthMode(mode) {
-      const isLogin = mode === 'login';
-      document.getElementById('login-form').classList.toggle('hidden', !isLogin);
-      document.getElementById('register-form').classList.toggle('hidden', isLogin);
-      document.getElementById('auth-error').classList.add('hidden');
-      document.getElementById('auth-tab-login').className = isLogin
-        ? 'py-2 text-xs font-bold rounded-lg bg-white text-[#0E7490] shadow-sm transition cursor-pointer'
-        : 'py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition cursor-pointer';
-      document.getElementById('auth-tab-register').className = !isLogin
-        ? 'py-2 text-xs font-bold rounded-lg bg-white text-[#0E7490] shadow-sm transition cursor-pointer'
-        : 'py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition cursor-pointer';
+    function switchAuthMode() {
+      const loginForm = document.getElementById('login-form');
+      const authErr = document.getElementById('auth-error');
+      if (loginForm) loginForm.classList.remove('hidden');
+      if (authErr) authErr.classList.add('hidden');
     }
 
     function showAuthError(msg) {
       const el = document.getElementById('auth-error');
       el.textContent = msg;
       el.classList.remove('hidden');
-    }
-
-    async function handleRegister(e) {
-      e.preventDefault();
-      const name = document.getElementById('reg-name').value.trim();
-      const username = document.getElementById('reg-username').value.trim().toLowerCase().replace(/\s+/g, '');
-      const pass = document.getElementById('reg-password').value;
-      const pass2 = document.getElementById('reg-password2').value;
-
-      if (username.length < 3) return showAuthError('O usuário deve ter pelo menos 3 caracteres.');
-      if (pass.length < 4) return showAuthError('A senha deve ter pelo menos 4 caracteres.');
-      if (pass !== pass2) return showAuthError('As senhas não coincidem.');
-
-      const users = getUsersMap();
-      if (users[username]) return showAuthError('Este nome de usuário já está cadastrado. Escolha outro ou faça login.');
-
-      const passHash = await hashPassword(username, pass);
-      users[username] = { username, name, role: 'user', cargo: 'Membro', ministry: '', phone: '', passHash, createdAt: todayISO() };
-      saveUsersMap(users);
-
-      startUserSession(users[username]);
-      document.getElementById('register-form').reset();
-      showToast(`Bem-vindo(a), ${name}! Conta criada com sucesso.`);
     }
 
     async function handleLogin(e) {
@@ -2649,6 +2646,7 @@
       document.getElementById('nav-tab-members').classList.toggle('hidden', !isAdmin());
       document.getElementById('nav-tab-admin').classList.toggle('hidden', !isAdmin());
       refreshAllUI();
+      maybeShowWelcomeTour();
     }
 
     function logoutUser() {
@@ -2718,7 +2716,7 @@
       const now = new Date();
       document.getElementById('live-clock').textContent = now.toLocaleTimeString('pt-BR');
       document.getElementById('live-date').textContent = now.toLocaleDateString('pt-BR', {
-        weekday: 'long', day: '2-digit', month: 'short', year: 'numeric'
+        weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
       });
     }
     setInterval(updateClock, 1000);
@@ -5858,6 +5856,126 @@
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
       if (!document.getElementById('tab-overview').classList.contains('hidden')) renderCharts();
+    }
+
+    // =========================================================================
+    // 10.11. TOUR GUIADO DE BOAS-VINDAS (MEMBROS & ADM)
+    // =========================================================================
+    let tourStepIdx = 0;
+
+    function getTourSteps() {
+      const base = [
+        {
+          emoji: '🏠',
+          title: 'Visão Geral & Mural da Igreja',
+          desc: 'Aqui você acompanha o Versículo do Dia, seu progresso de leitura, aniversariantes do mês e o Mural da Igreja.',
+          tip: '💡 Balão Dica: No Mural, qualquer membro pode publicar avisos, fotos, testemunhos e reagir com 🙏 Amém ou comentar!'
+        },
+        {
+          emoji: '🧭',
+          title: 'Conselheiro Bíblico (ACF)',
+          desc: 'Escolha o que está sentindo hoje (ansiedade, gratidão, dúvida...) ou pesquise um tema para receber direção bíblica imediata.',
+          tip: '💡 Balão Dica: Cada tema traz o versículo exato na ACF, contexto e passos práticos para o seu dia.'
+        },
+        {
+          emoji: '📖',
+          title: 'Bíblia (ACF) & Planos Diários',
+          desc: 'Leia todos os 66 livros com Modo Zen (sem distrações) e narração em áudio. Na aba Plano Diário, escolha entre 6 planos — incluindo Bíblia Completa em 1 Ano (365 dias).',
+          tip: '💡 Balão Dica: Clique em "Concluir Leitura de Hoje" ao terminar um capítulo para manter sua sequência de dias!'
+        },
+        {
+          emoji: '📅',
+          title: 'Agenda, Hábitos & Aniversários',
+          desc: 'Veja o calendário mensal com cultos da igreja e seus compromissos pessoais. Na aba Eventos & Aniversários, acompanhe os próximos 30 dias.',
+          tip: '💡 Balão Dica: Nos eventos da igreja, clique em "Vou participar" para confirmar sua presença!'
+        },
+        {
+          emoji: '🆘',
+          title: 'SOS Espiritual & Modo Escuro',
+          desc: 'Precisa de socorro imediato em um momento difícil? Clique no botão vermelho SOS no topo para respiração guiada, versículos e oração.',
+          tip: '💡 Balão Dica: Use o ícone 🌙 / ☀️ no topo para alternar entre Modo Claro e Escuro quando preferir.'
+        }
+      ];
+
+      if (isAdmin()) {
+        base.push(
+          {
+            emoji: '👥',
+            title: 'Membros & Cargos (Exclusivo ADM)',
+            desc: 'Na aba Membros & Cargos você visualiza o diretório completo da igreja, busca por ministério, vê tempo de casa e abre o WhatsApp com 1 clique.',
+            tip: '💡 Balão ADM: Você pode filtrar por cargo, aniversariantes do mês ou membros nascidos na igreja.'
+          },
+          {
+            emoji: '🛡️',
+            title: 'Painel ADM & Configurações (Exclusivo ADM)',
+            desc: 'No Painel ADM você cadastra/edita membros (inclusive login, senha, foto e permissão ADM), gerencia cargos e publica eventos oficiais na agenda.',
+            tip: '💡 Balão ADM: O ícone de engrenagem ⚙️ no topo dá acesso ao backup JSON e sincronização manual.'
+          }
+        );
+      }
+      return base;
+    }
+
+    function getTourSeenKey() {
+      return currentUser ? `portal_tour_seen_${currentUser.username}` : 'portal_tour_seen_guest';
+    }
+
+    function maybeShowWelcomeTour() {
+      if (!currentUser) return;
+      if (localStorage.getItem(getTourSeenKey()) === '1') return;
+      openWelcomeTour(false);
+    }
+
+    function openWelcomeTour(manual = true) {
+      tourStepIdx = 0;
+      const chk = document.getElementById('tour-dont-show');
+      if (chk) chk.checked = !manual || localStorage.getItem(getTourSeenKey()) === '1';
+      renderTourStep();
+      document.getElementById('welcome-tour-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeWelcomeTour() {
+      const chk = document.getElementById('tour-dont-show');
+      if (chk && chk.checked) {
+        localStorage.setItem(getTourSeenKey(), '1');
+      } else if (chk && !chk.checked) {
+        localStorage.removeItem(getTourSeenKey());
+      }
+      document.getElementById('welcome-tour-modal').classList.add('hidden');
+    }
+
+    function nextTourStep() {
+      const steps = getTourSteps();
+      if (tourStepIdx < steps.length - 1) {
+        tourStepIdx++;
+        renderTourStep();
+      } else {
+        closeWelcomeTour();
+      }
+    }
+
+    function prevTourStep() {
+      if (tourStepIdx > 0) {
+        tourStepIdx--;
+        renderTourStep();
+      }
+    }
+
+    function renderTourStep() {
+      const steps = getTourSteps();
+      const s = steps[tourStepIdx];
+      document.getElementById('tour-role-pill').textContent = isAdmin() ? 'Guia do Administrador (ADM)' : 'Guia do Membro';
+      document.getElementById('tour-step-emoji').textContent = s.emoji;
+      document.getElementById('tour-step-title').textContent = s.title;
+      document.getElementById('tour-step-desc').textContent = s.desc;
+      document.getElementById('tour-step-tip').textContent = s.tip;
+      document.getElementById('tour-step-counter').textContent = `Passo ${tourStepIdx + 1} de ${steps.length}`;
+      document.getElementById('tour-prev-btn').classList.toggle('invisible', tourStepIdx === 0);
+      document.getElementById('tour-next-btn').textContent = tourStepIdx === steps.length - 1 ? 'Começar a usar ✓' : 'Próximo →';
+      document.getElementById('tour-step-dots').innerHTML = steps.map((_, idx) =>
+        `<span class="w-2 h-2 rounded-full transition ${idx === tourStepIdx ? 'bg-[#0E7490] scale-125' : 'bg-slate-300'}"></span>`
+      ).join('');
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
