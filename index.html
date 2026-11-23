@@ -77,7 +77,7 @@
 
   <!-- TOP FIXED HEADER -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+    <div class="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
       <!-- Brand -->
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-10 h-10 rounded-xl bg-[#0E7490] text-white flex items-center justify-center shrink-0 shadow-sm">
@@ -138,7 +138,7 @@
 
   <!-- NAVIGATION TABS -->
   <nav id="nav-tabs-bar" class="bg-white border-b border-slate-200 sticky top-16 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto no-scrollbar">
+    <div class="w-full px-4 sm:px-6 lg:px-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
       <button data-tab="overview" onclick="switchTab('overview')" class="tab-btn active flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
         <span>Visão Geral</span>
@@ -163,6 +163,11 @@
         <span>Agenda &amp; Hábitos</span>
         <span id="badge-agenda" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-blue-100 text-blue-700">0 hoje</span>
       </button>
+      <button data-tab="events" onclick="switchTab('events')" class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-[#0E7490] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="party-popper" class="w-4 h-4"></i>
+        <span>Eventos &amp; Aniversários</span>
+        <span id="badge-events-upcoming" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-800">0</span>
+      </button>
       <button id="nav-tab-admin" data-tab="admin" onclick="switchTab('admin')" class="tab-btn hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-indigo-700 hover:text-indigo-900 whitespace-nowrap transition cursor-pointer">
         <i data-lucide="shield-check" class="w-4 h-4"></i>
         <span>Painel ADM</span>
@@ -172,7 +177,7 @@
   </nav>
 
   <!-- MAIN CONTENT CONTAINER -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+  <main class="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
     <!-- ==================== TAB 1: VISÃO GERAL ==================== -->
     <section id="tab-overview" class="tab-panel space-y-6">
@@ -915,6 +920,92 @@
             <button onclick="saveDevotionalNote()" class="mt-2 px-4 py-1.5 bg-[#0E7490] hover:bg-[#155E75] text-white text-xs font-semibold rounded-lg cursor-pointer">
               Salvar Anotação
             </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5.5: EVENTOS & ANIVERSÁRIOS ==================== -->
+    <section id="tab-events" class="tab-panel hidden space-y-6">
+      <!-- Top KPIs -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-4 border-l-4 border-l-indigo-600">
+          <span class="text-xs font-semibold text-slate-500">Próximo Evento</span>
+          <div id="ev-kpi-next-title" class="text-base font-bold text-indigo-700 mt-1 truncate">---</div>
+          <div id="ev-kpi-next-sub" class="text-xs text-slate-500 mt-0.5">Sem eventos próximos</div>
+        </div>
+        <div class="card p-4 border-l-4 border-l-[#0E7490]">
+          <span class="text-xs font-semibold text-slate-500">Eventos (Próx. 30 dias)</span>
+          <div id="ev-kpi-total" class="text-2xl font-bold text-[#0E7490] mt-1">0</div>
+          <div class="text-xs text-slate-500 mt-0.5">Igreja e compromissos</div>
+        </div>
+        <div class="card p-4 border-l-4 border-l-amber-500">
+          <span class="text-xs font-semibold text-slate-500">Aniversariantes (Próx. 30d)</span>
+          <div id="ev-kpi-bdays" class="text-2xl font-bold text-amber-600 mt-1">0</div>
+          <div id="ev-kpi-bdays-sub" class="text-xs text-slate-500 mt-0.5">Irmãos celebrando vida</div>
+        </div>
+        <div class="card p-4 border-l-4 border-l-emerald-500">
+          <span class="text-xs font-semibold text-slate-500">Aniv. de Igreja (Este Mês)</span>
+          <div id="ev-kpi-church-anniv" class="text-2xl font-bold text-emerald-600 mt-1">0</div>
+          <div class="text-xs text-slate-500 mt-0.5">Marcos de caminhada</div>
+        </div>
+      </div>
+
+      <!-- Main Content: Upcoming Events + Birthdays & Milestones -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Upcoming Events Timeline -->
+        <div class="card p-5 sm:p-6 lg:col-span-7 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-[#0E7490] flex items-center gap-2">
+                <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                Próximos Eventos (30 dias)
+              </h2>
+              <p class="text-xs text-slate-500">Programação da igreja e seus compromissos em ordem cronológica.</p>
+            </div>
+            <button onclick="switchTab('agenda')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+              + Gerenciar na Agenda
+            </button>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="flex flex-wrap gap-2">
+            <button onclick="setEventsFilter('all')" data-ev-filter="all" class="ev-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-[#0E7490] text-white cursor-pointer">Todos</button>
+            <button onclick="setEventsFilter('church')" data-ev-filter="church" class="ev-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">Agenda da Igreja</button>
+            <button onclick="setEventsFilter('personal')" data-ev-filter="personal" class="ev-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">Meus Compromissos</button>
+            <button onclick="setEventsFilter('week')" data-ev-filter="week" class="ev-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">Próximos 7 dias</button>
+          </div>
+
+          <div id="events-upcoming-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Right: Birthdays & Church Anniversaries -->
+        <div class="lg:col-span-5 space-y-6">
+          <!-- Upcoming Birthdays -->
+          <div class="card p-5 sm:p-6 border-t-4 border-t-amber-400 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <i data-lucide="cake" class="w-4 h-4 text-amber-500"></i>
+                  Próximos Aniversários
+                </h2>
+                <p class="text-xs text-slate-500">Aniversariantes dos próximos 45 dias.</p>
+              </div>
+              <span id="events-bdays-month-label" class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 capitalize">---</span>
+            </div>
+            <div id="events-birthdays-list" class="space-y-2.5 max-h-80 overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- Church Anniversaries & Milestones -->
+          <div class="card p-5 sm:p-6 border-t-4 border-t-emerald-500 space-y-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+                Aniversários de Igreja &amp; Marcos
+              </h2>
+              <p class="text-xs text-slate-500">Irmãos celebrando tempo de caminhada neste mês.</p>
+            </div>
+            <div id="events-anniversaries-list" class="space-y-2.5 max-h-72 overflow-y-auto pr-1"></div>
           </div>
         </div>
       </div>
@@ -2303,6 +2394,7 @@
       });
       if (tabId === 'overview') renderCharts();
       if (tabId === 'agenda') renderCalendar();
+      if (tabId === 'events') renderEventsPanel();
       if (tabId === 'admin' && isAdmin()) renderAdminPanel();
       lucide.createIcons();
     }
@@ -4278,11 +4370,236 @@
       renderCalendar();
     }
 
+    // =========================================================================
+    // 10.7. PAINEL DE PRÓXIMOS EVENTOS & ANIVERSÁRIOS
+    // =========================================================================
+    let currentEventsFilter = 'all';
+
+    function setEventsFilter(filter) {
+      currentEventsFilter = filter;
+      document.querySelectorAll('.ev-filter-btn').forEach(btn => {
+        const active = btn.dataset.evFilter === filter;
+        btn.className = active
+          ? 'ev-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-[#0E7490] text-white cursor-pointer'
+          : 'ev-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer';
+      });
+      renderEventsPanel();
+      lucide.createIcons();
+    }
+
+    function formatCountdownPill(daysDiff) {
+      if (daysDiff === 0) return '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-100 text-rose-700">Hoje!</span>';
+      if (daysDiff === 1) return '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800">Amanhã</span>';
+      return `<span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600">Em ${daysDiff} dias</span>`;
+    }
+
+    function renderEventsPanel() {
+      const now = new Date();
+      const baseToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const toISO = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const monthsShort = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+      const weekdaysShort = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+      // 1. Collect upcoming events for the next 30 days
+      const allUpcoming = [];
+      for (let offset = 0; offset <= 30; offset++) {
+        const d = new Date(baseToday);
+        d.setDate(baseToday.getDate() + offset);
+        const iso = toISO(d);
+        const churchList = getChurchEventsForDate(iso).map(ev => ({ ...ev, iso, offset, isChurch: true }));
+        const personalList = (state.events[iso] || []).map(ev => ({ ...ev, iso, offset, isChurch: false }));
+        allUpcoming.push(...churchList, ...personalList);
+      }
+
+      // Sort chronologically by date offset then startTime/time
+      allUpcoming.sort((a, b) => {
+        if (a.offset !== b.offset) return a.offset - b.offset;
+        return (a.startTime || a.time || '00:00').localeCompare(b.startTime || b.time || '00:00');
+      });
+
+      // Update tab badge & KPIs
+      const badge = document.getElementById('badge-events-upcoming');
+      if (badge) badge.textContent = allUpcoming.length;
+
+      const totalKpi = document.getElementById('ev-kpi-total');
+      if (totalKpi) totalKpi.textContent = allUpcoming.length;
+
+      const nextTitle = document.getElementById('ev-kpi-next-title');
+      const nextSub = document.getElementById('ev-kpi-next-sub');
+      if (nextTitle && nextSub) {
+        if (allUpcoming.length > 0) {
+          const first = allUpcoming[0];
+          const [y, m, d] = first.iso.split('-');
+          const tStr = first.startTime || first.time || '';
+          nextTitle.textContent = first.title;
+          nextSub.textContent = `${first.offset === 0 ? 'Hoje' : first.offset === 1 ? 'Amanhã' : d + '/' + m}${tStr ? ' às ' + tStr : ''}`;
+        } else {
+          nextTitle.textContent = 'Nenhum';
+          nextSub.textContent = 'Sem eventos nos próximos 30 dias';
+        }
+      }
+
+      // 2. Collect upcoming birthdays (next 45 days)
+      const users = Object.values(getUsersMap());
+      const upcomingBdays = [];
+      users.forEach(u => {
+        if (!u.birthDate) return;
+        const parts = u.birthDate.split('-').map(Number);
+        if (parts.length < 3) return;
+        const [bYear, bMonth, bDay] = parts;
+        let nextBday = new Date(now.getFullYear(), bMonth - 1, bDay);
+        if (nextBday < baseToday) {
+          nextBday = new Date(now.getFullYear() + 1, bMonth - 1, bDay);
+        }
+        const diffDays = Math.round((nextBday - baseToday) / 86400000);
+        if (diffDays <= 45) {
+          const turningAge = bYear > 1900 ? nextBday.getFullYear() - bYear : null;
+          upcomingBdays.push({ ...u, bDay, bMonth, diffDays, turningAge });
+        }
+      });
+      upcomingBdays.sort((a, b) => a.diffDays - b.diffDays);
+
+      const bdays30Count = upcomingBdays.filter(b => b.diffDays <= 30).length;
+      const bdayKpi = document.getElementById('ev-kpi-bdays');
+      const bdaySub = document.getElementById('ev-kpi-bdays-sub');
+      const bdayMonthLabel = document.getElementById('events-bdays-month-label');
+      if (bdayKpi) bdayKpi.textContent = bdays30Count;
+      if (bdaySub) {
+        const todayCount = upcomingBdays.filter(b => b.diffDays === 0).length;
+        bdaySub.textContent = todayCount > 0 ? `${todayCount} fazendo aniversário hoje! 🎂` : 'Irmãos celebrando vida';
+      }
+      if (bdayMonthLabel) bdayMonthLabel.textContent = now.toLocaleDateString('pt-BR', { month: 'long' });
+
+      // 3. Church anniversaries this month
+      const churchAnnivUsers = users
+        .map(u => ({ ...u, tenure: getChurchTenure(u.joinedDate || u.createdAt) }))
+        .filter(u => u.tenure.isAnnivMonth || u.bornInChurch);
+      const annivThisMonth = churchAnnivUsers.filter(u => u.tenure.isAnnivMonth);
+      const annivKpi = document.getElementById('ev-kpi-church-anniv');
+      if (annivKpi) annivKpi.textContent = annivThisMonth.length;
+
+      // Render Upcoming Events List
+      const listEl = document.getElementById('events-upcoming-list');
+      if (listEl) {
+        const filtered = allUpcoming.filter(ev => {
+          if (currentEventsFilter === 'church') return ev.isChurch;
+          if (currentEventsFilter === 'personal') return !ev.isChurch;
+          if (currentEventsFilter === 'week') return ev.offset <= 7;
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          listEl.innerHTML = '<p class="text-sm text-slate-400 italic py-6 text-center">Nenhum evento encontrado para este filtro.</p>';
+        } else {
+          listEl.innerHTML = filtered.map(ev => {
+            const [y, m, d] = ev.iso.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d);
+            const color = ev.isChurch ? (ev.color || '#4F46E5') : '#3B82F6';
+            const timeStr = ev.endTime ? `${ev.startTime || ev.time} - ${ev.endTime}` : (ev.startTime || ev.time || 'Dia todo');
+            const rsvps = ev.isChurch ? getEventRsvps(ev.iso, ev.id) : [];
+            const isGoing = ev.isChurch && currentUser && rsvps.some(r => r.username === currentUser.username);
+
+            return `
+              <div class="p-3.5 rounded-xl bg-white border border-slate-200 border-l-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:shadow-xs transition" style="border-left-color: ${color};">
+                <div class="flex items-start gap-3 min-w-0">
+                  <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center shrink-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase leading-none">${monthsShort[m - 1]}</span>
+                    <span class="text-base font-bold text-slate-800 leading-tight">${String(d).padStart(2, '0')}</span>
+                    <span class="text-[9px] text-slate-400 leading-none">${weekdaysShort[dateObj.getDay()]}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                      <span class="text-sm font-bold text-slate-800">${ev.title}</span>
+                      ${formatCountdownPill(ev.offset)}
+                      <span class="px-1.5 py-0.5 text-[10px] font-semibold rounded text-white" style="background-color: ${color};">${ev.isChurch ? (ev.isRecurring ? 'Igreja • Semanal' : 'Igreja') : 'Pessoal'}</span>
+                    </div>
+                    <p class="text-xs text-slate-500">🕒 ${timeStr} • ${ev.type}${ev.location ? ' • 📍 ' + ev.location : ''}</p>
+                    ${ev.notes ? `<p class="text-[11px] text-slate-500 mt-1">${ev.notes}</p>` : ''}
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  ${ev.isChurch ? `
+                    <button onclick="toggleChurchRsvp('${ev.iso}', '${ev.id}')" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg border transition cursor-pointer ${isGoing ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'}">
+                      ${isGoing ? '✓ Confirmado' : 'Vou participar'} (${rsvps.length})
+                    </button>
+                  ` : ''}
+                  <button onclick="jumpToCalendarDate('${ev.iso}')" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer" title="Ver no calendário">
+                    Calendário
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Render Upcoming Birthdays List
+      const bdayListEl = document.getElementById('events-birthdays-list');
+      if (bdayListEl) {
+        if (upcomingBdays.length === 0) {
+          bdayListEl.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum aniversário nos próximos 45 dias.</p>';
+        } else {
+          bdayListEl.innerHTML = upcomingBdays.map(u => {
+            const initials = u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+            const avatar = u.photo
+              ? `<img src="${u.photo}" class="w-10 h-10 rounded-full object-cover border border-amber-200 shrink-0" />`
+              : `<div class="w-10 h-10 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+            const isToday = u.diffDays === 0;
+            return `
+              <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl border ${isToday ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200'}">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  ${avatar}
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-800 truncate">${u.name}</p>
+                    <p class="text-[11px] text-slate-500">🎂 ${String(u.bDay).padStart(2, '0')}/${String(u.bMonth).padStart(2, '0')}${u.turningAge ? ` (${u.turningAge} anos)` : ''} • ${u.cargo || 'Membro'}</p>
+                  </div>
+                </div>
+                <div class="shrink-0">
+                  ${isToday ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white">Hoje! 🎉</span>' : formatCountdownPill(u.diffDays)}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Render Church Anniversaries List
+      const annivListEl = document.getElementById('events-anniversaries-list');
+      if (annivListEl) {
+        if (churchAnnivUsers.length === 0) {
+          annivListEl.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum marco de caminhada neste mês.</p>';
+        } else {
+          annivListEl.innerHTML = churchAnnivUsers.map(u => {
+            const initials = u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+            const avatar = u.photo
+              ? `<img src="${u.photo}" class="w-9 h-9 rounded-full object-cover border border-emerald-200 shrink-0" />`
+              : `<div class="w-9 h-9 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+            return `
+              <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  ${avatar}
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-800 truncate">${u.name}</p>
+                    <p class="text-[11px] text-slate-500">⛪ ${u.tenure.label} • ${u.cargo || 'Membro'}</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  ${u.tenure.isAnnivMonth ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-cyan-100 text-[#0E7490]">Aniv. Igreja 🎉</span>' : ''}
+                  ${u.bornInChurch ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800">🌱 Nascido na Igreja</span>' : ''}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
     function refreshAllUI() {
       renderOverviewKPIs();
       renderChurchPeriodSummaries();
       renderMonthlyBirthdays();
       renderChurchCuriosities();
+      renderEventsPanel();
       renderPrayers();
       renderFavorites();
       renderPlan();
