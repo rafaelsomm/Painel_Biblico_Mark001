@@ -992,6 +992,10 @@
           <button id="plan-pending-only-btn" onclick="togglePlanPendingOnly()" class="px-3 py-2 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer shrink-0">
             Só pendentes
           </button>
+          <button onclick="resetActiveReadingPlan()" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 cursor-pointer shrink-0" title="Zerar o progresso deste plano para fazer de novo">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Reiniciar Plano</span>
+          </button>
         </div>
 
         <div id="plan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -3686,7 +3690,8 @@
     function buildSequentialPlan(booksSlice, totalDays) {
       const chapters = [];
       booksSlice.forEach(b => {
-        for (let c = 1; c <= b.chapters; c++) {
+        const totalCh = b.ch || b.chapters || 0;
+        for (let c = 1; c <= totalCh; c++) {
           chapters.push({ book: b.id, name: b.name, ch: c });
         }
       });
@@ -3881,7 +3886,7 @@
       if (selectorGrid) {
         selectorGrid.innerHTML = plans.map(p => {
           const doneCount = getPlanDoneArray(p.id).length;
-          const pct = Math.round((doneCount / p.days.length) * 100);
+          const pct = p.days.length > 0 ? Math.round((doneCount / p.days.length) * 100) : 0;
           const isActive = p.id === activeId;
           return `
             <button onclick="selectReadingPlan('${p.id}')" class="text-left p-4 rounded-xl border transition cursor-pointer ${isActive ? 'bg-cyan-50/70 border-[#0E7490] ring-1 ring-[#0E7490]' : 'bg-white border-slate-200 hover:border-slate-300'}">
@@ -3902,7 +3907,7 @@
       // Active Plan Header & Progress
       const doneArr = getPlanDoneArray(activePlan.id);
       const done = doneArr.length;
-      const pct = Math.round((done / activePlan.days.length) * 100);
+      const pct = activePlan.days.length > 0 ? Math.round((done / activePlan.days.length) * 100) : 0;
       const titleEl = document.getElementById('plan-active-title');
       const descEl = document.getElementById('plan-active-desc');
       if (titleEl) titleEl.textContent = activePlan.name;
@@ -3979,6 +3984,26 @@
       if (idx === -1) arr.push(day);
       else arr.splice(idx, 1);
       saveState();
+    }
+
+    function resetActiveReadingPlan() {
+      const plans = getAllReadingPlans();
+      const activeId = state.activePlanId && plans.some(p => p.id === state.activePlanId) ? state.activePlanId : 'devocional30';
+      const activePlan = plans.find(p => p.id === activeId);
+      const doneArr = getPlanDoneArray(activeId);
+      if (doneArr.length === 0) {
+        showToast('Este plano já está zerado.');
+        return;
+      }
+      if (!confirm(`Deseja reiniciar o plano "${activePlan.name}" do zero?`)) return;
+      if (activeId === 'devocional30') {
+        state.planCompleted = [];
+      } else {
+        state.plansProgress = state.plansProgress || {};
+        state.plansProgress[activeId] = [];
+      }
+      saveState();
+      showToast('Plano reiniciado! Boa nova jornada.');
     }
 
     // =========================================================================
