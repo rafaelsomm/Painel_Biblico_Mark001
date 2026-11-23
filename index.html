@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
@@ -89,6 +91,12 @@
 
       <!-- Status, Clock & Actions -->
       <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Cloud Sync Status -->
+        <div id="cloud-sync-badge" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-semibold" title="Status da sincronização na nuvem (Firebase)">
+          <span id="cloud-sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="cloud-sync-text">Conectando...</span>
+        </div>
+
         <!-- Streak Badge -->
         <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold" title="Sequência atual de leitura diária">
           <i data-lucide="flame" class="w-4 h-4 text-emerald-600"></i>
@@ -1158,6 +1166,23 @@
         </div>
       </div>
 
+      <!-- Cloud Sync (Firebase) -->
+      <div class="space-y-2 pt-3 border-t border-slate-100">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase text-slate-400">Nuvem (Firebase Firestore)</h3>
+          <span id="settings-cloud-status" class="text-[11px] font-semibold text-slate-500">Verificando...</span>
+        </div>
+        <p class="text-xs text-slate-500">Se você já tinha usuários, cargos ou eventos salvos localmente neste navegador, clique abaixo para enviá-los para a nuvem.</p>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="pushLocalDataToCloud()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer">
+            <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> Enviar Dados Locais para a Nuvem
+          </button>
+          <button onclick="pullCloudDataNow()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 cursor-pointer">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Atualizar da Nuvem
+          </button>
+        </div>
+      </div>
+
       <!-- Optional Gemini API Key -->
       <div class="space-y-2 pt-3 border-t border-slate-100">
         <h3 class="text-xs font-bold uppercase text-slate-400">Conexão Opcional com IA (Gemini)</h3>
@@ -1776,7 +1801,198 @@
     };
 
     // =========================================================================
-    // 2. AUTHENTICATION, STATE & PERSISTENCE (localStorage per user)
+    // 1.5. FIREBASE FIRESTORE CLOUD SYNC
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDDhTSxQyulFfICyuE_FTzhLWAIs4QCSK0",
+      authDomain: "painel-biblico-mark001-c54fb.firebaseapp.com",
+      projectId: "painel-biblico-mark001-c54fb",
+      storageBucket: "painel-biblico-mark001-c54fb.firebasestorage.app",
+      messagingSenderId: "796780248518",
+      appId: "1:796780248518:web:721b5761eefeedf2ca86c7",
+      measurementId: "G-MTFDMPBDE3"
+    };
+
+    let cloudDb = null;
+    let cloudConnected = false;
+    const CLOUD_SHARED_COL = 'painel_biblico_acf';
+    const CLOUD_USERS_DATA_COL = 'painel_biblico_acf_user_data';
+
+    function setCloudStatusUI(online, label) {
+      cloudConnected = online;
+      const dot = document.getElementById('cloud-sync-dot');
+      const txt = document.getElementById('cloud-sync-text');
+      const badge = document.getElementById('cloud-sync-badge');
+      const settingsTxt = document.getElementById('settings-cloud-status');
+      if (dot) dot.className = `w-2 h-2 rounded-full ${online ? 'bg-emerald-500' : 'bg-amber-400'}`;
+      if (txt) txt.textContent = label;
+      if (badge) {
+        badge.classList.remove('hidden');
+        badge.className = `hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold ${
+          online ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
+        }`;
+      }
+      if (settingsTxt) settingsTxt.textContent = online ? 'Conectado (Sincronizado)' : label;
+    }
+
+    async function cloudWriteShared(docId, data) {
+      if (!cloudDb) return;
+      try {
+        await cloudDb.collection(CLOUD_SHARED_COL).doc(docId).set({
+          data: JSON.stringify(data),
+          updatedAt: Date.now()
+        });
+      } catch (e) {
+        console.warn('Erro ao salvar na nuvem (' + docId + '):', e);
+      }
+    }
+
+    async function cloudWriteUserData(username, userState) {
+      if (!cloudDb || !username) return;
+      try {
+        await cloudDb.collection(CLOUD_USERS_DATA_COL).doc(username).set({
+          data: JSON.stringify(userState),
+          updatedAt: Date.now()
+        });
+      } catch (e) {
+        console.warn('Erro ao salvar dados do usuário na nuvem:', e);
+      }
+    }
+
+    function applyCloudSharedDoc(docId, rawJson) {
+      if (!rawJson) return false;
+      const keyMap = {
+        users: USERS_KEY,
+        cargos: CHURCH_CARGOS_KEY,
+        events: CHURCH_EVENTS_KEY,
+        recurring: CHURCH_RECURRING_KEY,
+        rsvp: CHURCH_RSVP_KEY
+      };
+      const storageKey = keyMap[docId];
+      if (!storageKey) return false;
+      if (localStorage.getItem(storageKey) !== rawJson) {
+        localStorage.setItem(storageKey, rawJson);
+        if (docId === 'cargos') syncCargoSelects();
+        return true;
+      }
+      return false;
+    }
+
+    async function pullCloudDataNow(silent = false) {
+      if (!cloudDb) {
+        if (!silent) showToast('Firebase não está conectado.');
+        return;
+      }
+      try {
+        const [sharedSnap, userDataSnap] = await Promise.all([
+          cloudDb.collection(CLOUD_SHARED_COL).get(),
+          cloudDb.collection(CLOUD_USERS_DATA_COL).get()
+        ]);
+        sharedSnap.forEach(doc => {
+          const d = doc.data();
+          if (d && d.data) applyCloudSharedDoc(doc.id, d.data);
+        });
+        userDataSnap.forEach(doc => {
+          const d = doc.data();
+          if (d && d.data) {
+            localStorage.setItem(getUserStorageKey(doc.id), d.data);
+          }
+        });
+        if (currentUser) {
+          state = loadState();
+          refreshAllUI();
+        }
+        setCloudStatusUI(true, 'Nuvem ativa');
+        if (!silent) showToast('Dados atualizados da nuvem!');
+      } catch (e) {
+        console.warn('Erro ao buscar da nuvem:', e);
+        setCloudStatusUI(false, 'Modo local');
+        if (!silent) showToast('Não foi possível conectar ao Firebase.');
+      }
+    }
+
+    async function pushLocalDataToCloud() {
+      if (!cloudDb) {
+        showToast('Firebase indisponível no momento.');
+        return;
+      }
+      try {
+        showToast('Enviando dados para a nuvem...');
+        await Promise.all([
+          cloudWriteShared('users', getUsersMap()),
+          cloudWriteShared('cargos', getChurchCargos()),
+          cloudWriteShared('events', getChurchEventsMap()),
+          cloudWriteShared('recurring', getChurchRecurringList()),
+          cloudWriteShared('rsvp', getChurchRsvpMap())
+        ]);
+        const users = getUsersMap();
+        const userPromises = Object.keys(users).map(uname => {
+          const raw = localStorage.getItem(getUserStorageKey(uname));
+          if (!raw) return Promise.resolve();
+          try {
+            return cloudWriteUserData(uname, JSON.parse(raw));
+          } catch {
+            return Promise.resolve();
+          }
+        });
+        await Promise.all(userPromises);
+        setCloudStatusUI(true, 'Nuvem ativa');
+        showToast('Todos os dados locais foram enviados para a nuvem!');
+      } catch (e) {
+        console.error(e);
+        showToast('Erro ao enviar dados para a nuvem.');
+      }
+    }
+
+    async function initCloudSync() {
+      try {
+        if (!window.firebase) {
+          setCloudStatusUI(false, 'Modo local');
+          return;
+        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        cloudDb = firebase.firestore();
+        await pullCloudDataNow(true);
+
+        // Real-time listeners for shared church/user data
+        cloudDb.collection(CLOUD_SHARED_COL).onSnapshot(snap => {
+          let changed = false;
+          snap.docChanges().forEach(change => {
+            if (change.type === 'added' || change.type === 'modified') {
+              const d = change.doc.data();
+              if (d && d.data && applyCloudSharedDoc(change.doc.id, d.data)) {
+                changed = true;
+              }
+            }
+          });
+          if (changed && currentUser) refreshAllUI();
+        });
+
+        cloudDb.collection(CLOUD_USERS_DATA_COL).onSnapshot(snap => {
+          let changed = false;
+          snap.docChanges().forEach(change => {
+            if (change.type === 'added' || change.type === 'modified') {
+              const d = change.doc.data();
+              const uname = change.doc.id;
+              if (d && d.data && localStorage.getItem(getUserStorageKey(uname)) !== d.data) {
+                localStorage.setItem(getUserStorageKey(uname), d.data);
+                if (currentUser && currentUser.username === uname) {
+                  state = loadState();
+                }
+                changed = true;
+              }
+            }
+          });
+          if (changed && currentUser) refreshAllUI();
+        });
+      } catch (e) {
+        console.warn('Falha ao inicializar Firebase:', e);
+        setCloudStatusUI(false, 'Modo local');
+      }
+    }
+
+    // =========================================================================
+    // 2. AUTHENTICATION, STATE & PERSISTENCE (localStorage + Firebase)
     // =========================================================================
     const USERS_KEY = 'painel_biblico_acf_users_v1';
     const SESSION_KEY = 'painel_biblico_acf_session_v1';
@@ -1806,6 +2022,7 @@
     }
     function saveChurchCargos(list) {
       localStorage.setItem(CHURCH_CARGOS_KEY, JSON.stringify(list));
+      cloudWriteShared('cargos', list);
       syncCargoSelects();
     }
     function syncCargoSelects() {
@@ -1825,6 +2042,7 @@
     }
     function saveChurchRsvpMap(map) {
       localStorage.setItem(CHURCH_RSVP_KEY, JSON.stringify(map));
+      cloudWriteShared('rsvp', map);
     }
     function getEventRsvps(iso, eventId) {
       return getChurchRsvpMap()[`${iso}::${eventId}`] || [];
@@ -1861,6 +2079,7 @@
     }
     function saveChurchEventsMap(map) {
       localStorage.setItem(CHURCH_EVENTS_KEY, JSON.stringify(map));
+      cloudWriteShared('events', map);
     }
 
     function getChurchRecurringList() {
@@ -1872,6 +2091,7 @@
     }
     function saveChurchRecurringList(list) {
       localStorage.setItem(CHURCH_RECURRING_KEY, JSON.stringify(list));
+      cloudWriteShared('recurring', list);
     }
 
     function getChurchEventsForDate(iso) {
@@ -1930,6 +2150,7 @@
     }
     function saveUsersMap(map) {
       localStorage.setItem(USERS_KEY, JSON.stringify(map));
+      cloudWriteShared('users', map);
     }
 
     function switchAuthMode(mode) {
@@ -2057,6 +2278,7 @@
     function saveState() {
       if (!currentUser) return;
       localStorage.setItem(getUserStorageKey(currentUser.username), JSON.stringify(state));
+      cloudWriteUserData(currentUser.username, state);
       refreshAllUI();
     }
 
@@ -4075,6 +4297,7 @@
 
 
     window.addEventListener('DOMContentLoaded', async () => {
+      await initCloudSync();
       await ensureDefaultAdmin();
       initCounselorChips();
       initReaderSelectors();
