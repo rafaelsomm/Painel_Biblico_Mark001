@@ -2,8 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Bíblico ACF — Estudo, Devocional &amp; Conselheiro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0E7490" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Painel Bíblico — Estudo, Devocional &amp; Conselheiro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -34,17 +37,51 @@
     };
   </script>
   <style>
-    body { background-color: #F8FAFC; color: #0F172A; }
+    html, body {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    body {
+      background-color: #F4F7FB;
+      color: #0F172A;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    button, a, select, input[type="checkbox"], input[type="radio"] {
+      touch-action: manipulation;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    @media (max-width: 640px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+      .tab-btn {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+    }
     .card {
       background: #FFFFFF;
       border: 1px solid #E2E8F0;
-      border-radius: 0.75rem;
-      box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.03);
+      transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.2s ease;
+    }
+    .tab-btn {
+      border-radius: 0.625rem 0.625rem 0 0;
+      transition: all 0.2s ease;
     }
     .tab-btn.active {
       color: #0E7490;
       border-bottom: 2px solid #0E7490;
       background-color: #ECFEFF;
+      font-weight: 600;
     }
     .zen-mode header,
     .zen-mode #nav-tabs-bar,
@@ -71,9 +108,109 @@
     ::-webkit-scrollbar-track { background: #F1F5F9; }
     ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* ==================== DARK MODE HARMONIOUS THEME ==================== */
+    body.dark {
+      background-color: #0B1120 !important;
+      color: #E2E8F0 !important;
+    }
+    body.dark header,
+    body.dark #nav-tabs-bar,
+    body.dark #footer-bar {
+      background-color: rgba(15, 23, 42, 0.94) !important;
+      border-color: #1E293B !important;
+    }
+    body.dark .card,
+    body.dark #auth-overlay > div,
+    body.dark #settings-modal > div,
+    body.dark #edit-member-modal > div,
+    body.dark #cargos-modal > div,
+    body.dark #sos-modal > div {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #E2E8F0 !important;
+      box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.45);
+    }
+    body.dark #auth-overlay {
+      background-color: #0B1120 !important;
+    }
+    body.dark .bg-white { background-color: #1E293B !important; }
+    body.dark .bg-\[\#F8FAFC\] { background-color: #0B1120 !important; }
+    body.dark .bg-slate-50,
+    body.dark .bg-slate-50\/70,
+    body.dark .bg-slate-50\/50 { background-color: #0F172A !important; }
+    body.dark .bg-slate-100 { background-color: #334155 !important; }
+    body.dark .hover\:bg-slate-50:hover,
+    body.dark .hover\:bg-slate-100:hover { background-color: #334155 !important; }
+
+    body.dark .border-slate-100,
+    body.dark .border-slate-200,
+    body.dark .border-slate-300 { border-color: #334155 !important; }
+
+    body.dark .text-slate-900,
+    body.dark .text-slate-800 { color: #F1F5F9 !important; }
+    body.dark .text-slate-700 { color: #CBD5E1 !important; }
+    body.dark .text-slate-600 { color: #94A3B8 !important; }
+    body.dark .text-slate-500,
+    body.dark .text-slate-400 { color: #94A3B8 !important; }
+    body.dark .text-\[\#0E7490\] { color: #22D3EE !important; }
+    body.dark .text-indigo-700,
+    body.dark .text-indigo-800,
+    body.dark .text-indigo-900 { color: #A5B4FC !important; }
+    body.dark .text-emerald-700,
+    body.dark .text-emerald-800 { color: #6EE7B7 !important; }
+    body.dark .text-amber-800,
+    body.dark .text-amber-900 { color: #FCD34D !important; }
+    body.dark .text-rose-700,
+    body.dark .text-rose-800 { color: #FDA4AF !important; }
+
+    body.dark .bg-cyan-50,
+    body.dark .bg-cyan-50\/60 { background-color: rgba(14, 116, 144, 0.22) !important; }
+    body.dark .bg-indigo-50,
+    body.dark .bg-indigo-50\/60,
+    body.dark .bg-indigo-50\/50 { background-color: rgba(79, 70, 229, 0.18) !important; }
+    body.dark .bg-emerald-50,
+    body.dark .bg-emerald-50\/70 { background-color: rgba(16, 185, 129, 0.18) !important; }
+    body.dark .bg-amber-50,
+    body.dark .bg-amber-50\/50 { background-color: rgba(245, 158, 11, 0.18) !important; }
+    body.dark .bg-rose-50,
+    body.dark .bg-rose-100 { background-color: rgba(239, 68, 68, 0.18) !important; }
+    body.dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.18) !important; }
+
+    body.dark .border-cyan-100,
+    body.dark .border-cyan-200 { border-color: rgba(34, 211, 238, 0.28) !important; }
+    body.dark .border-indigo-100,
+    body.dark .border-indigo-200,
+    body.dark .border-indigo-300 { border-color: rgba(129, 140, 248, 0.3) !important; }
+    body.dark .border-emerald-200 { border-color: rgba(52, 211, 153, 0.3) !important; }
+    body.dark .border-amber-200,
+    body.dark .border-amber-300 { border-color: rgba(251, 191, 36, 0.3) !important; }
+    body.dark .border-rose-200,
+    body.dark .border-rose-300 { border-color: rgba(251, 113, 133, 0.3) !important; }
+
+    body.dark .tab-btn.active {
+      color: #22D3EE !important;
+      border-bottom-color: #22D3EE !important;
+      background-color: rgba(14, 116, 144, 0.22) !important;
+    }
+
+    body.dark input,
+    body.dark select,
+    body.dark textarea {
+      background-color: #0F172A !important;
+      border-color: #334155 !important;
+      color: #F1F5F9 !important;
+    }
+    body.dark input::placeholder,
+    body.dark textarea::placeholder {
+      color: #64748B !important;
+    }
+    body.dark ::-webkit-scrollbar-track { background: #0F172A; }
+    body.dark ::-webkit-scrollbar-thumb { background: #334155; }
+    body.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
 </head>
-<body class="font-sans antialiased min-h-screen flex flex-col">
+<body class="font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
 
   <!-- TOP FIXED HEADER -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
@@ -84,8 +221,8 @@
           <i data-lucide="book-open" class="w-5 h-5"></i>
         </div>
         <div class="min-w-0">
-          <h1 class="text-base sm:text-lg font-bold text-[#0E7490] truncate leading-tight">Painel Bíblico ACF</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">Almeida Corrigida Fiel • Estudo, Devocional &amp; Aconselhamento</p>
+          <h1 class="text-base sm:text-lg font-bold text-[#0E7490] truncate leading-tight">Painel Bíblico</h1>
+          <p class="text-xs text-slate-500 hidden sm:block">Almeida Corrigida Fiel • Estudo, Devocional, Aconselhamento, Agenda, Aniversários e Compromissos</p>
         </div>
       </div>
 
@@ -109,14 +246,20 @@
           <span id="live-date" class="text-[11px] text-slate-500 capitalize">---</span>
         </div>
 
-        <!-- SOS Espiritual -->
-        <button onclick="openSosModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#EF4444] hover:bg-red-600 text-white text-xs sm:text-sm font-semibold shadow-sm transition cursor-pointer">
-          <i data-lucide="heart-pulse" class="w-4 h-4"></i>
-          <span>SOS Espiritual</span>
+        <!-- Dark Mode Toggle -->
+        <button id="theme-toggle-btn" onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer" title="Alternar Modo Claro / Escuro">
+          <i id="theme-toggle-icon" data-lucide="moon" class="w-4 h-4"></i>
         </button>
 
-        <!-- Backup / Settings -->
-        <button onclick="openSettingsModal()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer" title="Backup JSON e Configurações">
+        <!-- SOS Espiritual -->
+        <button onclick="openSosModal()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#EF4444] hover:bg-red-600 text-white text-xs sm:text-sm font-semibold shadow-sm transition cursor-pointer shrink-0">
+          <i data-lucide="heart-pulse" class="w-4 h-4"></i>
+          <span class="sm:hidden">SOS</span>
+          <span class="hidden sm:inline">SOS Espiritual</span>
+        </button>
+
+        <!-- Backup / Settings (ADM only) -->
+        <button id="header-settings-btn" onclick="openSettingsModal()" class="hidden p-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer" title="Backup JSON e Configurações">
           <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
 
@@ -167,6 +310,11 @@
         <i data-lucide="party-popper" class="w-4 h-4"></i>
         <span>Eventos &amp; Aniversários</span>
         <span id="badge-events-upcoming" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-800">0</span>
+      </button>
+      <button id="nav-tab-members" data-tab="members" onclick="switchTab('members')" class="tab-btn hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-[#0E7490] hover:text-[#155E75] whitespace-nowrap transition cursor-pointer">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span>Membros &amp; Cargos</span>
+        <span id="badge-members-dir" class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-cyan-100 text-[#0E7490]">0</span>
       </button>
       <button id="nav-tab-admin" data-tab="admin" onclick="switchTab('admin')" class="tab-btn hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-indigo-700 hover:text-indigo-900 whitespace-nowrap transition cursor-pointer">
         <i data-lucide="shield-check" class="w-4 h-4"></i>
@@ -409,6 +557,56 @@
         </div>
       </div>
 
+      <!-- MURAL / FEED DA IGREJA (TODOS PODEM POSTAR) -->
+      <div class="card p-5 sm:p-6 border-t-4 border-t-[#0E7490] space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-bold text-[#0E7490] flex items-center gap-2">
+              <i data-lucide="message-square-heart" class="w-4 h-4"></i>
+              Mural &amp; Feed da Igreja — Ocorridos, Avisos e Testemunhos
+            </h3>
+            <p class="text-xs text-slate-500">Todos os membros podem publicar acontecimentos, avisos, testemunhos e pedidos.</p>
+          </div>
+          <span id="overview-feed-count" class="text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-[#0E7490]">0 publicações</span>
+        </div>
+
+        <!-- New Post Form -->
+        <form onsubmit="addFeedPost(event)" class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <select id="feed-category-input" class="px-3 py-2 text-xs font-semibold border border-slate-200 rounded-lg bg-white text-slate-700 sm:w-48">
+              <option value="Ocorrido / Aviso">📢 Ocorrido / Aviso</option>
+              <option value="Testemunho">✨ Testemunho</option>
+              <option value="Pedido de Oração">🙏 Pedido de Oração</option>
+              <option value="Gratidão / Louvor">🙌 Gratidão / Louvor</option>
+            </select>
+            <textarea id="feed-text-input" rows="2" required placeholder="Compartilhe um ocorrido, testemunho, aviso ou pedido com a igreja..."
+              class="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#0E7490]"></textarea>
+          </div>
+          <div id="feed-photo-preview-wrap" class="hidden items-center gap-3">
+            <img id="feed-photo-preview" src="" class="h-16 w-24 object-cover rounded-lg border border-slate-200" />
+            <button type="button" onclick="clearFeedPhoto()" class="text-xs text-rose-600 hover:underline cursor-pointer">Remover imagem</button>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2 flex-1">
+              <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 cursor-pointer">
+                <i data-lucide="image-plus" class="w-3.5 h-3.5 text-[#0E7490]"></i>
+                <span>Anexar Foto</span>
+                <input id="feed-photo-input" type="file" accept="image/*" onchange="previewFeedPhoto(event)" class="hidden" />
+              </label>
+              <input id="feed-video-url-input" type="url" placeholder="Link de vídeo (YouTube, MP4...)"
+                class="flex-1 min-w-[180px] px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#0E7490]" />
+            </div>
+            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0E7490] hover:bg-[#155E75] text-white text-xs font-semibold rounded-lg transition cursor-pointer">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>Publicar no Mural</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Feed List (Instagram Style) -->
+        <div id="overview-feed-list" class="max-w-xl mx-auto space-y-6"></div>
+      </div>
+
       <!-- BOTTOM ROW: 3 PROGRESS CHARTS (Chart.js) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Chart 1: Progresso de Leitura & Divisões Bíblicas -->
@@ -455,7 +653,7 @@
             <h2 class="text-lg font-bold text-[#0E7490]">Conselheiro Bíblico (Almeida Corrigida Fiel)</h2>
             <p class="text-sm text-slate-500">Pesquise ou selecione uma das 3 perguntas-chave para receber direção bíblica imediata.</p>
           </div>
-          <button onclick="openSettingsModal()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1.5 self-start cursor-pointer">
+          <button id="counselor-settings-btn" onclick="openSettingsModal()" class="hidden text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1.5 self-start cursor-pointer">
             <i data-lucide="cpu" class="w-3.5 h-3.5 text-[#0E7490]"></i>
             <span id="ai-status-label">IA Gemini: Opcional (Offline ativo)</span>
           </button>
@@ -768,18 +966,32 @@
 
     <!-- ==================== TAB 4: PLANO DIÁRIO ==================== -->
     <section id="tab-plan" class="tab-panel hidden space-y-6">
-      <div class="card p-5 sm:p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+      <!-- Plan Selector Cards -->
+      <div id="plan-selector-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+
+      <!-- Active Plan Content -->
+      <div class="card p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 class="text-lg font-bold text-[#0E7490]">Plano de Leitura Devocional (30 Dias Essenciais ACF)</h2>
-            <p class="text-sm text-slate-500">Uma jornada estruturada pelos pilares da fé: Criação, Salmos, Sabedoria, Evangelhos e Epístolas.</p>
+            <h2 id="plan-active-title" class="text-lg font-bold text-[#0E7490]">Plano de Leitura Devocional (30 Dias Essenciais ACF)</h2>
+            <p id="plan-active-desc" class="text-sm text-slate-500">Uma jornada estruturada pelos pilares da fé: Criação, Salmos, Sabedoria, Evangelhos e Epístolas.</p>
           </div>
-          <div class="text-right">
+          <div class="text-left sm:text-right shrink-0">
             <span id="plan-progress-text" class="text-sm font-bold text-[#10B981]">0 / 30 concluídos</span>
-            <div class="w-48 h-2 bg-slate-100 rounded-full overflow-hidden mt-1">
+            <div class="w-36 sm:w-48 h-2 bg-slate-100 rounded-full overflow-hidden mt-1">
               <div id="plan-progress-bar" class="h-full bg-[#10B981] transition-all duration-300" style="width: 0%"></div>
             </div>
           </div>
+        </div>
+
+        <!-- Filter & Search Bar for Plans -->
+        <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-100">
+          <input id="plan-search-input" type="text" oninput="renderPlan()" placeholder="Buscar dia, livro ou tema (ex: Gênesis, Salmos, Dia 15)..."
+            class="flex-1 px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#0E7490]" />
+          <select id="plan-chunk-select" onchange="renderPlan()" class="hidden px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-lg bg-white text-slate-700"></select>
+          <button id="plan-pending-only-btn" onclick="togglePlanPendingOnly()" class="px-3 py-2 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer shrink-0">
+            Só pendentes
+          </button>
         </div>
 
         <div id="plan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -1011,6 +1223,73 @@
       </div>
     </section>
 
+    <!-- ==================== TAB 5.8: MEMBROS & CARGOS (SOMENTE ADM) ==================== -->
+    <section id="tab-members" class="tab-panel hidden space-y-6">
+      <!-- KPIs -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-4 border-l-4 border-l-[#0E7490]">
+          <span class="text-xs font-semibold text-slate-500">Total de Membros</span>
+          <div id="members-kpi-total" class="text-2xl font-bold text-[#0E7490] mt-1">0</div>
+        </div>
+        <div class="card p-4 border-l-4 border-l-indigo-600">
+          <span class="text-xs font-semibold text-slate-500">Cargos na Igreja</span>
+          <div id="members-kpi-cargos" class="text-2xl font-bold text-indigo-700 mt-1">0</div>
+        </div>
+        <div class="card p-4 border-l-4 border-l-emerald-500">
+          <span class="text-xs font-semibold text-slate-500">Tempo de Casa Somado</span>
+          <div id="members-kpi-years" class="text-2xl font-bold text-emerald-600 mt-1">0 anos</div>
+        </div>
+        <div class="card p-4 border-l-4 border-l-amber-500">
+          <span class="text-xs font-semibold text-slate-500">Nascidos na Igreja</span>
+          <div id="members-kpi-born" class="text-2xl font-bold text-amber-600 mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- Search, Filters & Cargo Summary -->
+      <div class="card p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-[#0E7490] flex items-center gap-2">
+              <i data-lucide="users" class="w-4 h-4"></i>
+              Diretório Completo de Membros, Cargos &amp; Tempo de Casa
+            </h2>
+            <p class="text-xs text-slate-500">Visão exclusiva para administradores com busca, filtros, contatos e marcos de caminhada.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openCargosModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition cursor-pointer">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+              <span>Gerenciar Cargos</span>
+            </button>
+            <button onclick="switchTab('admin')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#0E7490] text-white hover:bg-[#155E75] transition cursor-pointer">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              <span>+ Cadastrar Membro</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input id="members-search-input" type="text" oninput="renderMembersDirectory()" placeholder="Buscar por nome, @usuário, matrícula ou ministério..."
+            class="md:col-span-2 px-3.5 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#0E7490]" />
+          <select id="members-filter-cargo" onchange="renderMembersDirectory()" class="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700">
+            <option value="">Todos os Cargos</option>
+          </select>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="setMembersQuickFilter('all')" data-mem-filter="all" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-[#0E7490] text-white cursor-pointer">Todos</button>
+          <button onclick="setMembersQuickFilter('born')" data-mem-filter="born" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🌱 Nascidos na Igreja</button>
+          <button onclick="setMembersQuickFilter('bday')" data-mem-filter="bday" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🎂 Aniversariantes do Mês</button>
+          <button onclick="setMembersQuickFilter('admin')" data-mem-filter="admin" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🛡️ Administradores</button>
+        </div>
+
+        <!-- Cargo Distribution Pills -->
+        <div id="members-cargo-pills" class="flex flex-wrap gap-2 pt-2 border-t border-slate-100"></div>
+      </div>
+
+      <!-- Members Cards Grid -->
+      <div id="members-directory-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </section>
+
     <!-- ==================== TAB 6: PAINEL ADM (MEMBROS, ATIVIDADES & PERSONOGRAMA) ==================== -->
     <section id="tab-admin" class="tab-panel hidden space-y-6">
       <!-- ADM KPIs -->
@@ -1176,7 +1455,7 @@
 
   <!-- FOOTER -->
   <footer id="footer-bar" class="border-t border-slate-200 bg-white py-4 px-4 text-center text-xs text-slate-500">
-    Painel Bíblico ACF • Dados salvos localmente no seu navegador (localStorage) • Tradução Almeida Corrigida Fiel
+    Painel Bíblico • Dados sincronizados na nuvem (Firebase) e cache local • Tradução Almeida Corrigida Fiel
   </footer>
 
   <!-- ==================== MODAL: SOS ESPIRITUAL ==================== -->
@@ -1229,6 +1508,17 @@
           <p id="sos-prayer" class="text-sm text-slate-700 italic leading-relaxed"></p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: FEED IMAGE LIGHTBOX ==================== -->
+  <div id="feed-image-modal" onclick="closeFeedImageModal()" class="fixed inset-0 z-50 hidden bg-slate-950/90 backdrop-blur-xs flex items-center justify-center p-4 cursor-zoom-out">
+    <button onclick="closeFeedImageModal()" class="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    <div onclick="event.stopPropagation()" class="max-w-4xl w-full flex flex-col items-center gap-3 cursor-default">
+      <img id="feed-lightbox-img" src="" class="max-h-[82vh] max-w-full rounded-xl object-contain shadow-2xl" />
+      <p id="feed-lightbox-caption" class="text-xs sm:text-sm text-white/90 text-center max-w-2xl"></p>
     </div>
   </div>
 
@@ -1322,6 +1612,12 @@
           </div>
         </div>
 
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Usuário (login)</label>
+          <input id="edit-mem-new-username" type="text" required minlength="3" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600 disabled:bg-slate-100 disabled:text-slate-500" />
+          <p class="text-[10px] text-slate-400 mt-0.5">Se alterar o usuário de login, informe também uma nova senha abaixo.</p>
+        </div>
+
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Data de Nascimento</label>
@@ -1412,7 +1708,7 @@
         <div class="w-12 h-12 rounded-2xl bg-[#0E7490] text-white flex items-center justify-center mx-auto shadow-sm">
           <i data-lucide="book-open" class="w-6 h-6"></i>
         </div>
-        <h2 class="text-xl font-bold text-[#0E7490]">Painel Bíblico ACF</h2>
+        <h2 class="text-xl font-bold text-[#0E7490]">Painel Bíblico</h2>
         <p class="text-xs text-slate-500">Acesse sua conta pessoal ou crie uma nova para salvar seu progresso, orações e anotações.</p>
       </div>
 
@@ -1908,6 +2204,8 @@
     let cloudConnected = false;
     const CLOUD_SHARED_COL = 'painel_biblico_acf';
     const CLOUD_USERS_DATA_COL = 'painel_biblico_acf_user_data';
+    const CLOUD_FEED_COL = 'painel_biblico_acf_feed';
+    let cloudFeedCache = null;
 
     function setCloudStatusUI(online, label) {
       cloudConnected = online;
@@ -1957,7 +2255,8 @@
         cargos: CHURCH_CARGOS_KEY,
         events: CHURCH_EVENTS_KEY,
         recurring: CHURCH_RECURRING_KEY,
-        rsvp: CHURCH_RSVP_KEY
+        rsvp: CHURCH_RSVP_KEY,
+        feed: CHURCH_FEED_KEY
       };
       const storageKey = keyMap[docId];
       if (!storageKey) return false;
@@ -1975,9 +2274,10 @@
         return;
       }
       try {
-        const [sharedSnap, userDataSnap] = await Promise.all([
+        const [sharedSnap, userDataSnap, feedSnap] = await Promise.all([
           cloudDb.collection(CLOUD_SHARED_COL).get(),
-          cloudDb.collection(CLOUD_USERS_DATA_COL).get()
+          cloudDb.collection(CLOUD_USERS_DATA_COL).get(),
+          cloudDb.collection(CLOUD_FEED_COL).get()
         ]);
         sharedSnap.forEach(doc => {
           const d = doc.data();
@@ -1989,6 +2289,16 @@
             localStorage.setItem(getUserStorageKey(doc.id), d.data);
           }
         });
+        const feedPosts = [];
+        feedSnap.forEach(doc => {
+          const d = doc.data();
+          if (d && d.id) feedPosts.push(d);
+        });
+        if (feedPosts.length > 0) {
+          feedPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          cloudFeedCache = feedPosts;
+          try { localStorage.setItem(CHURCH_FEED_KEY, JSON.stringify(feedPosts)); } catch {}
+        }
         if (currentUser) {
           state = loadState();
           refreshAllUI();
@@ -2014,7 +2324,8 @@
           cloudWriteShared('cargos', getChurchCargos()),
           cloudWriteShared('events', getChurchEventsMap()),
           cloudWriteShared('recurring', getChurchRecurringList()),
-          cloudWriteShared('rsvp', getChurchRsvpMap())
+          cloudWriteShared('rsvp', getChurchRsvpMap()),
+          cloudWriteShared('feed', getChurchFeed())
         ]);
         const users = getUsersMap();
         const userPromises = Object.keys(users).map(uname => {
@@ -2076,6 +2387,20 @@
           });
           if (changed && currentUser) refreshAllUI();
         });
+
+        cloudDb.collection(CLOUD_FEED_COL).onSnapshot(snap => {
+          const posts = [];
+          snap.forEach(doc => {
+            const d = doc.data();
+            if (d && d.id) posts.push(d);
+          });
+          if (posts.length > 0 || (cloudFeedCache && cloudFeedCache.length > 0)) {
+            posts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            cloudFeedCache = posts;
+            try { localStorage.setItem(CHURCH_FEED_KEY, JSON.stringify(posts)); } catch {}
+            if (currentUser) renderChurchFeed();
+          }
+        });
       } catch (e) {
         console.warn('Falha ao inicializar Firebase:', e);
         setCloudStatusUI(false, 'Modo local');
@@ -2091,6 +2416,7 @@
     const CHURCH_RECURRING_KEY = 'painel_biblico_acf_church_recurring_v1';
     const CHURCH_RSVP_KEY = 'painel_biblico_acf_church_rsvp_v1';
     const CHURCH_CARGOS_KEY = 'painel_biblico_acf_cargos_v1';
+    const CHURCH_FEED_KEY = 'painel_biblico_acf_feed_v1';
     const DEFAULT_CHURCH_CARGOS = [
       'Pastor Presidente',
       'Pastor / Presbítero',
@@ -2313,7 +2639,10 @@
       userArea.classList.add('flex');
       document.getElementById('header-user-name').textContent = user.name;
       document.getElementById('header-adm-badge').classList.toggle('hidden', !isAdmin());
+      document.getElementById('header-settings-btn').classList.toggle('hidden', !isAdmin());
+      document.getElementById('counselor-settings-btn').classList.toggle('hidden', !isAdmin());
       document.getElementById('admin-church-event-toggle').classList.toggle('hidden', !isAdmin());
+      document.getElementById('nav-tab-members').classList.toggle('hidden', !isAdmin());
       document.getElementById('nav-tab-admin').classList.toggle('hidden', !isAdmin());
       refreshAllUI();
     }
@@ -2325,6 +2654,9 @@
       state = defaultState();
       document.getElementById('header-user-area').classList.add('hidden');
       document.getElementById('header-user-area').classList.remove('flex');
+      document.getElementById('header-settings-btn').classList.add('hidden');
+      document.getElementById('counselor-settings-btn').classList.add('hidden');
+      document.getElementById('nav-tab-members').classList.add('hidden');
       document.getElementById('nav-tab-admin').classList.add('hidden');
       switchTab('overview');
       document.getElementById('auth-overlay').classList.remove('hidden');
@@ -2344,7 +2676,9 @@
         meditatedDays: [],      // ['2026-11-23']
         chaptersRead: ['sl:23'],// ['sl:23', ...]
         favorites: [],          // [{ ref, text, book, ch }]
-        planCompleted: [],      // [1, 2, ...]
+        planCompleted: [],      // [1, 2, ...] (legacy 30-day plan)
+        activePlanId: 'devocional30',
+        plansProgress: {},      // { biblia365: [1, 2], nt90: [1], ... }
         events: {},             // { '2026-11-23': [{ id, title, type, time }] }
         notes: {},              // { '2026-11-23': 'texto...' }
         prayers: [],            // [{ id, date, title, category, answered, testimony }]
@@ -2387,6 +2721,10 @@
     updateClock();
 
     function switchTab(tabId) {
+      if ((tabId === 'admin' || tabId === 'members') && !isAdmin()) {
+        showToast('Acesso restrito ao administrador.');
+        return;
+      }
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
       document.querySelectorAll('.tab-btn').forEach(b => {
@@ -2395,6 +2733,7 @@
       if (tabId === 'overview') renderCharts();
       if (tabId === 'agenda') renderCalendar();
       if (tabId === 'events') renderEventsPanel();
+      if (tabId === 'members' && isAdmin()) renderMembersDirectory();
       if (tabId === 'admin' && isAdmin()) renderAdminPanel();
       lucide.createIcons();
     }
@@ -3339,21 +3678,287 @@
     }
 
     // =========================================================================
-    // 7. PLANO DIÁRIO
+    // 7. PLANOS DE LEITURA DIÁRIA (MÚLTIPLOS PLANOS)
     // =========================================================================
+    let planPendingOnly = false;
+    let cachedReadingPlans = null;
+
+    function buildSequentialPlan(booksSlice, totalDays) {
+      const chapters = [];
+      booksSlice.forEach(b => {
+        for (let c = 1; c <= b.chapters; c++) {
+          chapters.push({ book: b.id, name: b.name, ch: c });
+        }
+      });
+      const days = [];
+      let cursor = 0;
+      for (let d = 1; d <= totalDays; d++) {
+        const remainingDays = totalDays - d + 1;
+        const remainingChaps = chapters.length - cursor;
+        const take = Math.max(1, Math.ceil(remainingChaps / remainingDays));
+        const slice = chapters.slice(cursor, cursor + take);
+        cursor += take;
+        if (slice.length === 0) break;
+        const first = slice[0];
+        const last = slice[slice.length - 1];
+        const ref = first.book === last.book
+          ? (first.ch === last.ch ? `${first.name} ${first.ch}` : `${first.name} ${first.ch}–${last.ch}`)
+          : `${first.name} ${first.ch} – ${last.name} ${last.ch}`;
+        days.push({
+          day: d,
+          title: `${slice.length} ${slice.length === 1 ? 'capítulo' : 'capítulos'}`,
+          book: first.book,
+          ch: first.ch,
+          ref
+        });
+      }
+      return days;
+    }
+
+    function getAllReadingPlans() {
+      if (cachedReadingPlans) return cachedReadingPlans;
+
+      const ntStartIdx = BIBLE_BOOKS.findIndex(b => b.id === 'mt');
+      const ntBooks = ntStartIdx >= 0 ? BIBLE_BOOKS.slice(ntStartIdx) : [];
+
+      const sabedoria31 = Array.from({ length: 31 }, (_, i) => {
+        const d = i + 1;
+        const psCh = ((d * 5 - 3) % 150) + 1;
+        return {
+          day: d,
+          title: `Sabedoria & Louvor • Salmos ${psCh}`,
+          book: 'pv',
+          ch: d,
+          ref: `Provérbios ${d} & Salmos ${psCh}`
+        };
+      });
+
+      const evangelhos30 = [
+        { day: 1, title: 'O Verbo se fez Carne', book: 'jo', ch: 1, ref: 'João 1' },
+        { day: 2, title: 'Nascimento de Jesus', book: 'lc', ch: 2, ref: 'Lucas 2' },
+        { day: 3, title: 'Batismo e Tentação', book: 'mt', ch: 3, ref: 'Mateus 3–4' },
+        { day: 4, title: 'Bodas de Caná', book: 'jo', ch: 2, ref: 'João 2' },
+        { day: 5, title: 'Nicodemos: Novo Nascimento', book: 'jo', ch: 3, ref: 'João 3' },
+        { day: 6, title: 'A Mulher Samaritana', book: 'jo', ch: 4, ref: 'João 4' },
+        { day: 7, title: 'Sermão do Monte I', book: 'mt', ch: 5, ref: 'Mateus 5' },
+        { day: 8, title: 'Sermão do Monte II', book: 'mt', ch: 6, ref: 'Mateus 6' },
+        { day: 9, title: 'Sermão do Monte III', book: 'mt', ch: 7, ref: 'Mateus 7' },
+        { day: 10, title: 'Autoridade e Milagres', book: 'mc', ch: 2, ref: 'Marcos 2' },
+        { day: 11, title: 'Parábola do Semeador', book: 'mc', ch: 4, ref: 'Marcos 4' },
+        { day: 12, title: 'Acalma a Tempestade', book: 'mc', ch: 5, ref: 'Marcos 5' },
+        { day: 13, title: 'Pão da Vida', book: 'jo', ch: 6, ref: 'João 6' },
+        { day: 14, title: 'A Confissão de Pedro', book: 'mt', ch: 16, ref: 'Mateus 16' },
+        { day: 15, title: 'A Transfiguração', book: 'lc', ch: 9, ref: 'Lucas 9' },
+        { day: 16, title: 'O Bom Samaritano', book: 'lc', ch: 10, ref: 'Lucas 10' },
+        { day: 17, title: 'O Bom Pastor', book: 'jo', ch: 10, ref: 'João 10' },
+        { day: 18, title: 'Ressurreição de Lázaro', book: 'jo', ch: 11, ref: 'João 11' },
+        { day: 19, title: 'O Filho Pródigo', book: 'lc', ch: 15, ref: 'Lucas 15' },
+        { day: 20, title: 'Zaqueu e a Salvação', book: 'lc', ch: 19, ref: 'Lucas 19' },
+        { day: 21, title: 'Entrada Triunfal', book: 'mt', ch: 21, ref: 'Mateus 21' },
+        { day: 22, title: 'Lava-pés e Novo Mandamento', book: 'jo', ch: 13, ref: 'João 13' },
+        { day: 23, title: 'Eu Sou o Caminho', book: 'jo', ch: 14, ref: 'João 14' },
+        { day: 24, title: 'A Videira Verdadeira', book: 'jo', ch: 15, ref: 'João 15' },
+        { day: 25, title: 'Oração Sacerdotal', book: 'jo', ch: 17, ref: 'João 17' },
+        { day: 26, title: 'Getsêmani', book: 'lc', ch: 22, ref: 'Lucas 22' },
+        { day: 27, title: 'A Crucificação', book: 'jo', ch: 19, ref: 'João 19' },
+        { day: 28, title: 'A Ressurreição', book: 'jo', ch: 20, ref: 'João 20' },
+        { day: 29, title: 'Caminho de Emaús', book: 'lc', ch: 24, ref: 'Lucas 24' },
+        { day: 30, title: 'A Grande Comissão', book: 'mt', ch: 28, ref: 'Mateus 28' }
+      ];
+
+      const oracao21 = [
+        { day: 1, title: 'Clamor e Resposta', book: 'jr', ch: 33, ref: 'Jeremias 33' },
+        { day: 2, title: 'Oração no Secreto', book: 'mt', ch: 6, ref: 'Mateus 6' },
+        { day: 3, title: 'Pedi e Dar-se-vos-á', book: 'mt', ch: 7, ref: 'Mateus 7' },
+        { day: 4, title: 'Não Estejais Inquietos', book: 'fp', ch: 4, ref: 'Filipenses 4' },
+        { day: 5, title: 'Oração de Davi', book: 'sl', ch: 51, ref: 'Salmos 51' },
+        { day: 6, title: 'Sede de Deus', book: 'sl', ch: 42, ref: 'Salmos 42' },
+        { day: 7, title: 'Habitar no Esconderijo', book: 'sl', ch: 91, ref: 'Salmos 91' },
+        { day: 8, title: 'Oração de Ana', book: '1sm', ch: 2, ref: '1 Samuel 2' },
+        { day: 9, title: 'Oração de Elias', book: '1rs', ch: 18, ref: '1 Reis 18' },
+        { day: 10, title: 'Oração de Daniel', book: 'dn', ch: 9, ref: 'Daniel 9' },
+        { day: 11, title: 'Fé que Move Montes', book: 'mc', ch: 11, ref: 'Marcos 11' },
+        { day: 12, title: 'Oração Persistente', book: 'lc', ch: 18, ref: 'Lucas 18' },
+        { day: 13, title: 'Oração e Sabedoria', book: 'tg', ch: 1, ref: 'Tiago 1' },
+        { day: 14, title: 'Oração do Justo', book: 'tg', ch: 5, ref: 'Tiago 5' },
+        { day: 15, title: 'Acesso ao Trono da Graça', book: 'hb', ch: 4, ref: 'Hebreus 4' },
+        { day: 16, title: 'Heróis da Fé', book: 'hb', ch: 11, ref: 'Hebreus 11' },
+        { day: 17, title: 'O Espírito Intercede', book: 'rm', ch: 8, ref: 'Romanos 8' },
+        { day: 18, title: 'Oração de Paulo pela Igreja', book: 'ef', ch: 3, ref: 'Efésios 3' },
+        { day: 19, title: 'Vigilância e Oração', book: 'ef', ch: 6, ref: 'Efésios 6' },
+        { day: 20, title: 'Confiança nas Promessas', book: '1jo', ch: 5, ref: '1 João 5' },
+        { day: 21, title: 'Ações de Graças', book: 'sl', ch: 103, ref: 'Salmos 103' }
+      ];
+
+      cachedReadingPlans = [
+        {
+          id: 'devocional30',
+          name: 'Devocional: 30 Dias Essenciais',
+          badge: 'Devocional',
+          color: '#0E7490',
+          desc: 'Jornada pelos pilares da fé: Criação, Salmos, Sabedoria, Evangelhos e Epístolas.',
+          days: PLAN_30_DAYS
+        },
+        {
+          id: 'biblia365',
+          name: 'Bíblia Completa em 1 Ano (365 Dias)',
+          badge: 'Completa • 1.189 caps',
+          color: '#4F46E5',
+          desc: 'Leia toda a Bíblia de Gênesis a Apocalipse em 365 dias (~3 a 4 capítulos por dia).',
+          days: buildSequentialPlan(BIBLE_BOOKS, 365)
+        },
+        {
+          id: 'nt90',
+          name: 'Novo Testamento em 90 Dias',
+          badge: 'Leitura Diária • 90d',
+          color: '#10B981',
+          desc: 'Percorra todo o Novo Testamento (Mateus a Apocalipse) em 3 meses.',
+          days: buildSequentialPlan(ntBooks, 90)
+        },
+        {
+          id: 'sabedoria31',
+          name: 'Sabedoria & Adoração (31 Dias)',
+          badge: 'Devocional Diário',
+          color: '#F59E0B',
+          desc: '1 capítulo de Provérbios + 1 Salmo por dia para direção prática e louvor.',
+          days: sabedoria31
+        },
+        {
+          id: 'evangelhos30',
+          name: 'Vida de Jesus nos Evangelhos (30d)',
+          badge: 'Evangelhos',
+          color: '#0EA5E9',
+          desc: 'Acompanhe o ministério, os milagres, a cruz e a ressurreição de Cristo.',
+          days: evangelhos30
+        },
+        {
+          id: 'oracao21',
+          name: '21 Dias de Oração, Fé & Propósito',
+          badge: 'Consagração',
+          color: '#EC4899',
+          desc: 'Série de 21 dias focada em intimidade com Deus, oração e fé.',
+          days: oracao21
+        }
+      ];
+      return cachedReadingPlans;
+    }
+
+    function getPlanDoneArray(planId) {
+      if (planId === 'devocional30') {
+        state.planCompleted = Array.isArray(state.planCompleted) ? state.planCompleted : [];
+        return state.planCompleted;
+      }
+      state.plansProgress = state.plansProgress || {};
+      if (!Array.isArray(state.plansProgress[planId])) state.plansProgress[planId] = [];
+      return state.plansProgress[planId];
+    }
+
+    function selectReadingPlan(planId) {
+      state.activePlanId = planId;
+      const chunkSel = document.getElementById('plan-chunk-select');
+      if (chunkSel) chunkSel.value = '0';
+      saveState();
+    }
+
+    function togglePlanPendingOnly() {
+      planPendingOnly = !planPendingOnly;
+      const btn = document.getElementById('plan-pending-only-btn');
+      if (btn) {
+        btn.className = planPendingOnly
+          ? 'px-3 py-2 text-xs font-semibold rounded-lg bg-[#0E7490] text-white cursor-pointer shrink-0'
+          : 'px-3 py-2 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer shrink-0';
+      }
+      renderPlan();
+    }
+
     function renderPlan() {
-      const done = state.planCompleted.length;
-      const pct = Math.round((done / PLAN_30_DAYS.length) * 100);
-      document.getElementById('plan-progress-text').textContent = `${done} / ${PLAN_30_DAYS.length} concluídos`;
+      const plans = getAllReadingPlans();
+      const activeId = state.activePlanId && plans.some(p => p.id === state.activePlanId) ? state.activePlanId : 'devocional30';
+      const activePlan = plans.find(p => p.id === activeId);
+
+      // Render Plan Selector Cards
+      const selectorGrid = document.getElementById('plan-selector-grid');
+      if (selectorGrid) {
+        selectorGrid.innerHTML = plans.map(p => {
+          const doneCount = getPlanDoneArray(p.id).length;
+          const pct = Math.round((doneCount / p.days.length) * 100);
+          const isActive = p.id === activeId;
+          return `
+            <button onclick="selectReadingPlan('${p.id}')" class="text-left p-4 rounded-xl border transition cursor-pointer ${isActive ? 'bg-cyan-50/70 border-[#0E7490] ring-1 ring-[#0E7490]' : 'bg-white border-slate-200 hover:border-slate-300'}">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full text-white" style="background-color: ${p.color};">${p.badge}</span>
+                <span class="text-xs font-bold text-[#10B981]">${pct}%</span>
+              </div>
+              <p class="text-sm font-bold text-slate-800 truncate">${p.name}</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">${doneCount} / ${p.days.length} dias concluídos</p>
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-2">
+                <div class="h-full transition-all duration-300" style="width: ${pct}%; background-color: ${p.color};"></div>
+              </div>
+            </button>
+          `;
+        }).join('');
+      }
+
+      // Active Plan Header & Progress
+      const doneArr = getPlanDoneArray(activePlan.id);
+      const done = doneArr.length;
+      const pct = Math.round((done / activePlan.days.length) * 100);
+      const titleEl = document.getElementById('plan-active-title');
+      const descEl = document.getElementById('plan-active-desc');
+      if (titleEl) titleEl.textContent = activePlan.name;
+      if (descEl) descEl.textContent = activePlan.desc;
+      document.getElementById('plan-progress-text').textContent = `${done} / ${activePlan.days.length} concluídos`;
       document.getElementById('plan-progress-bar').style.width = `${pct}%`;
       document.getElementById('badge-plan').textContent = `${pct}%`;
 
-      document.getElementById('plan-grid').innerHTML = PLAN_30_DAYS.map(item => {
-        const isDone = state.planCompleted.includes(item.day);
+      // Chunk selector for long plans (e.g., 365 days -> 30-day blocks)
+      const chunkSel = document.getElementById('plan-chunk-select');
+      const q = (document.getElementById('plan-search-input')?.value || '').trim().toLowerCase();
+      let items = activePlan.days;
+
+      if (chunkSel) {
+        if (activePlan.days.length > 45 && !q) {
+          const chunkSize = 30;
+          const totalChunks = Math.ceil(activePlan.days.length / chunkSize);
+          const prevVal = chunkSel.value || '0';
+          chunkSel.innerHTML = Array.from({ length: totalChunks }, (_, idx) => {
+            const start = idx * chunkSize + 1;
+            const end = Math.min((idx + 1) * chunkSize, activePlan.days.length);
+            return `<option value="${idx}">Dias ${start} a ${end}</option>`;
+          }).join('') + '<option value="all">Ver todos os dias</option>';
+          chunkSel.value = (prevVal === 'all' || Number(prevVal) < totalChunks) ? prevVal : '0';
+          chunkSel.classList.remove('hidden');
+
+          if (chunkSel.value !== 'all') {
+            const idx = Number(chunkSel.value) || 0;
+            items = items.slice(idx * chunkSize, (idx + 1) * chunkSize);
+          }
+        } else {
+          chunkSel.classList.add('hidden');
+        }
+      }
+
+      if (q) {
+        items = activePlan.days.filter(item =>
+          `dia ${item.day} ${item.ref} ${item.title}`.toLowerCase().includes(q)
+        );
+      }
+      if (planPendingOnly) {
+        items = items.filter(item => !doneArr.includes(item.day));
+      }
+
+      const gridEl = document.getElementById('plan-grid');
+      if (items.length === 0) {
+        gridEl.innerHTML = '<p class="text-xs text-slate-400 italic md:col-span-3 py-6 text-center">Nenhum dia encontrado para este filtro.</p>';
+        return;
+      }
+
+      gridEl.innerHTML = items.map(item => {
+        const isDone = doneArr.includes(item.day);
         return `
           <div class="p-3.5 rounded-xl border ${isDone ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'} flex items-center justify-between gap-2">
             <div class="flex items-center gap-3 min-w-0">
-              <input type="checkbox" ${isDone ? 'checked' : ''} onchange="togglePlanDay(${item.day})"
+              <input type="checkbox" ${isDone ? 'checked' : ''} onchange="togglePlanDay(${item.day}, '${activePlan.id}')"
                 class="w-4 h-4 accent-[#10B981] rounded cursor-pointer shrink-0" />
               <div class="min-w-0">
                 <p class="text-xs font-bold text-[#0E7490]">Dia ${item.day} • ${item.ref}</p>
@@ -3368,10 +3973,11 @@
       }).join('');
     }
 
-    function togglePlanDay(day) {
-      const idx = state.planCompleted.indexOf(day);
-      if (idx === -1) state.planCompleted.push(day);
-      else state.planCompleted.splice(idx, 1);
+    function togglePlanDay(day, planId = state.activePlanId || 'devocional30') {
+      const arr = getPlanDoneArray(planId);
+      const idx = arr.indexOf(day);
+      if (idx === -1) arr.push(day);
+      else arr.splice(idx, 1);
       saveState();
     }
 
@@ -3731,6 +4337,10 @@
     }
 
     function openSettingsModal() {
+      if (!isAdmin()) {
+        showToast('Acesso restrito ao administrador.');
+        return;
+      }
       document.getElementById('gemini-key-input').value = state.geminiApiKey || '';
       document.getElementById('settings-modal').classList.remove('hidden');
     }
@@ -4032,6 +4642,11 @@
       const u = getUsersMap()[username];
       if (!u) return;
       document.getElementById('edit-mem-username').value = u.username;
+      const newUInput = document.getElementById('edit-mem-new-username');
+      if (newUInput) {
+        newUInput.value = u.username;
+        newUInput.disabled = u.username === 'adm';
+      }
       document.getElementById('edit-mem-name').value = u.name || '';
       document.getElementById('edit-mem-matricula').value = u.matricula || '';
       document.getElementById('edit-mem-birthdate').value = u.birthDate || '';
@@ -4086,11 +4701,32 @@
     async function saveEditedMember(e) {
       e.preventDefault();
       if (!isAdmin()) return;
-      const username = document.getElementById('edit-mem-username').value;
+      const oldUsername = document.getElementById('edit-mem-username').value;
+      const newUInput = document.getElementById('edit-mem-new-username');
+      const newUsername = (oldUsername === 'adm' || !newUInput)
+        ? oldUsername
+        : newUInput.value.trim().toLowerCase().replace(/\s+/g, '');
       const users = getUsersMap();
-      const u = users[username];
+      const u = users[oldUsername];
       if (!u) return;
 
+      const newPass = document.getElementById('edit-mem-pass').value;
+      if (newUsername !== oldUsername) {
+        if (newUsername.length < 3) {
+          showToast('O usuário de login precisa ter pelo menos 3 caracteres.');
+          return;
+        }
+        if (users[newUsername]) {
+          showToast('Já existe outro membro com esse usuário de login!');
+          return;
+        }
+        if (!newPass || newPass.length < 4) {
+          showToast('Ao alterar o usuário de login, informe também uma Nova Senha (mín. 4 caracteres).');
+          return;
+        }
+      }
+
+      u.username = newUsername;
       u.name = document.getElementById('edit-mem-name').value.trim();
       u.matricula = document.getElementById('edit-mem-matricula').value.trim();
       u.birthDate = document.getElementById('edit-mem-birthdate').value;
@@ -4099,23 +4735,91 @@
       u.cargo = document.getElementById('edit-mem-cargo').value;
       u.ministry = document.getElementById('edit-mem-ministry').value.trim();
       u.phone = document.getElementById('edit-mem-phone').value.trim();
-      u.role = u.username === 'adm' ? 'admin' : document.getElementById('edit-mem-role').value;
+      u.role = newUsername === 'adm' ? 'admin' : document.getElementById('edit-mem-role').value;
       u.photo = editMemberPhotoDataUrl;
 
-      const newPass = document.getElementById('edit-mem-pass').value;
       if (newPass && newPass.length >= 4) {
-        u.passHash = await hashPassword(username, newPass);
+        u.passHash = await hashPassword(newUsername, newPass);
+      }
+
+      if (newUsername !== oldUsername) {
+        users[newUsername] = u;
+        delete users[oldUsername];
+
+        // Migrate user's personal state
+        const oldDataKey = getUserStorageKey(oldUsername);
+        const newDataKey = getUserStorageKey(newUsername);
+        const rawData = localStorage.getItem(oldDataKey);
+        if (rawData) {
+          localStorage.setItem(newDataKey, rawData);
+          localStorage.removeItem(oldDataKey);
+          try {
+            cloudWriteUserData(newUsername, JSON.parse(rawData));
+            if (cloudDb) cloudDb.collection(CLOUD_USERS_DATA_COL).doc(oldUsername).delete().catch(() => {});
+          } catch {}
+        }
+
+        // Update RSVPs referencing oldUsername
+        const rsvpMap = getChurchRsvpMap();
+        let rsvpChanged = false;
+        Object.keys(rsvpMap).forEach(k => {
+          rsvpMap[k] = (rsvpMap[k] || []).map(r => {
+            if (r.username === oldUsername) {
+              rsvpChanged = true;
+              return { username: newUsername, name: u.name };
+            }
+            return r;
+          });
+        });
+        if (rsvpChanged) saveChurchRsvpMap(rsvpMap);
+
+        // Update Feed posts/comments referencing oldUsername
+        const feedList = getChurchFeed();
+        let feedUpdated = false;
+        feedList.forEach(p => {
+          let postChanged = false;
+          if (p.authorUsername === oldUsername) {
+            p.authorUsername = newUsername;
+            p.authorName = u.name;
+            postChanged = true;
+          }
+          if (Array.isArray(p.amens) && p.amens.includes(oldUsername)) {
+            p.amens = p.amens.map(x => x === oldUsername ? newUsername : x);
+            postChanged = true;
+          }
+          if (Array.isArray(p.comments)) {
+            p.comments.forEach(c => {
+              if (c.authorUsername === oldUsername) {
+                c.authorUsername = newUsername;
+                c.authorName = u.name;
+                postChanged = true;
+              }
+            });
+          }
+          if (postChanged) {
+            feedUpdated = true;
+            if (cloudDb) cloudDb.collection(CLOUD_FEED_COL).doc(p.id).set(p).catch(() => {});
+          }
+        });
+        if (feedUpdated) {
+          cloudFeedCache = feedList;
+          try { localStorage.setItem(CHURCH_FEED_KEY, JSON.stringify(feedList)); } catch {}
+        }
       }
 
       saveUsersMap(users);
-      if (currentUser && currentUser.username === username) {
+      if (currentUser && currentUser.username === oldUsername) {
+        currentUser.username = newUsername;
         currentUser.name = u.name;
+        localStorage.setItem(SESSION_KEY, newUsername);
         document.getElementById('header-user-name').textContent = u.name;
       }
       closeEditMemberModal();
+      renderMembersDirectory();
       renderAdminPanel();
       renderMonthlyBirthdays();
       renderChurchCuriosities();
+      renderChurchFeed();
       showToast(`Cadastro de ${u.name} atualizado!`);
     }
 
@@ -4594,11 +5298,504 @@
       }
     }
 
+    // =========================================================================
+    // 10.8. MURAL / FEED DA IGREJA (TODOS PODEM POSTAR)
+    // =========================================================================
+    let pendingFeedPhotoDataUrl = '';
+
+    function getYoutubeEmbedUrl(url) {
+      if (!url) return null;
+      const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+    }
+
+    function getChurchFeed() {
+      if (Array.isArray(cloudFeedCache)) return cloudFeedCache;
+      try {
+        const parsed = JSON.parse(localStorage.getItem(CHURCH_FEED_KEY) || '[]');
+        cloudFeedCache = Array.isArray(parsed) ? parsed : [];
+        return cloudFeedCache;
+      } catch {
+        return [];
+      }
+    }
+    function saveChurchFeed(list, changedPost = null, deletedPostId = null) {
+      cloudFeedCache = list;
+      try { localStorage.setItem(CHURCH_FEED_KEY, JSON.stringify(list)); } catch {}
+      if (cloudDb) {
+        if (deletedPostId) {
+          cloudDb.collection(CLOUD_FEED_COL).doc(deletedPostId).delete().catch(e => console.warn(e));
+        } else if (changedPost) {
+          cloudDb.collection(CLOUD_FEED_COL).doc(changedPost.id).set(changedPost).catch(e => console.warn(e));
+        } else {
+          cloudWriteShared('feed', list);
+        }
+      }
+    }
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function previewFeedPhoto(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const maxW = 720;
+          const scale = img.width > maxW ? maxW / img.width : 1;
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          pendingFeedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          document.getElementById('feed-photo-preview').src = pendingFeedPhotoDataUrl;
+          document.getElementById('feed-photo-preview-wrap').classList.remove('hidden');
+          document.getElementById('feed-photo-preview-wrap').classList.add('flex');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearFeedPhoto() {
+      pendingFeedPhotoDataUrl = '';
+      const inp = document.getElementById('feed-photo-input');
+      if (inp) inp.value = '';
+      const wrap = document.getElementById('feed-photo-preview-wrap');
+      if (wrap) {
+        wrap.classList.add('hidden');
+        wrap.classList.remove('flex');
+      }
+    }
+
+    function addFeedPost(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+      const textEl = document.getElementById('feed-text-input');
+      const catEl = document.getElementById('feed-category-input');
+      const videoUrlEl = document.getElementById('feed-video-url-input');
+      const text = textEl.value.trim();
+      const videoUrl = videoUrlEl ? videoUrlEl.value.trim() : '';
+      if (!text) return;
+
+      const list = getChurchFeed();
+      const newPost = {
+        id: 'feed_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        authorUsername: currentUser.username,
+        authorName: currentUser.name,
+        category: catEl.value,
+        text,
+        photo: pendingFeedPhotoDataUrl || '',
+        videoUrl,
+        createdAt: Date.now(),
+        amens: [],
+        comments: []
+      };
+      list.unshift(newPost);
+      saveChurchFeed(list.slice(0, 60), newPost);
+      textEl.value = '';
+      if (videoUrlEl) videoUrlEl.value = '';
+      clearFeedPhoto();
+      renderChurchFeed();
+      lucide.createIcons();
+      showToast('Publicado no mural da igreja!');
+    }
+
+    function addFeedComment(e, postId) {
+      e.preventDefault();
+      if (!currentUser) return;
+      const inp = document.getElementById(`feed-comment-input-${postId}`);
+      if (!inp) return;
+      const text = inp.value.trim();
+      if (!text) return;
+
+      const list = getChurchFeed();
+      const post = list.find(p => p.id === postId);
+      if (!post) return;
+      post.comments = Array.isArray(post.comments) ? post.comments : [];
+      post.comments.push({
+        id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+        authorUsername: currentUser.username,
+        authorName: currentUser.name,
+        text,
+        createdAt: Date.now()
+      });
+      saveChurchFeed(list, post);
+      renderChurchFeed();
+      lucide.createIcons();
+    }
+
+    function deleteFeedComment(postId, commentId) {
+      if (!currentUser) return;
+      const list = getChurchFeed();
+      const post = list.find(p => p.id === postId);
+      if (!post || !Array.isArray(post.comments)) return;
+      const c = post.comments.find(x => x.id === commentId);
+      if (!c) return;
+      if (c.authorUsername !== currentUser.username && !isAdmin()) return;
+      post.comments = post.comments.filter(x => x.id !== commentId);
+      saveChurchFeed(list, post);
+      renderChurchFeed();
+      lucide.createIcons();
+    }
+
+    function toggleFeedAmen(postId) {
+      if (!currentUser) return;
+      const list = getChurchFeed();
+      const post = list.find(p => p.id === postId);
+      if (!post) return;
+      post.amens = Array.isArray(post.amens) ? post.amens : [];
+      const idx = post.amens.indexOf(currentUser.username);
+      if (idx === -1) post.amens.push(currentUser.username);
+      else post.amens.splice(idx, 1);
+      saveChurchFeed(list, post);
+      renderChurchFeed();
+      lucide.createIcons();
+    }
+
+    function deleteFeedPost(postId) {
+      if (!currentUser) return;
+      const list = getChurchFeed();
+      const post = list.find(p => p.id === postId);
+      if (!post) return;
+      if (post.authorUsername !== currentUser.username && !isAdmin()) return;
+      if (!confirm('Remover esta publicação do mural?')) return;
+      saveChurchFeed(list.filter(p => p.id !== postId), null, postId);
+      renderChurchFeed();
+      lucide.createIcons();
+      showToast('Publicação removida.');
+    }
+
+    function renderChurchFeed() {
+      const container = document.getElementById('overview-feed-list');
+      const countBadge = document.getElementById('overview-feed-count');
+      if (!container) return;
+
+      const list = getChurchFeed();
+      if (countBadge) countBadge.textContent = `${list.length} ${list.length === 1 ? 'publicação' : 'publicações'}`;
+
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 italic py-6 text-center">Nenhuma publicação no mural ainda. Seja o primeiro a compartilhar algo!</p>';
+        return;
+      }
+
+      const usersMap = getUsersMap();
+      const catBadge = {
+        'Ocorrido / Aviso': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'Testemunho': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'Pedido de Oração': 'bg-amber-50 text-amber-800 border-amber-200',
+        'Gratidão / Louvor': 'bg-cyan-50 text-[#0E7490] border-cyan-200'
+      };
+
+      container.innerHTML = list.map(post => {
+        const u = usersMap[post.authorUsername] || {};
+        const name = u.name || post.authorName || 'Membro';
+        const cargo = u.cargo || 'Membro';
+        const initials = name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+        const avatar = u.photo
+          ? `<img src="${u.photo}" class="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0" />`
+          : `<div class="w-9 h-9 rounded-full bg-[#0E7490] text-white text-xs font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+        const dt = new Date(post.createdAt);
+        const dtStr = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' às ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const amens = Array.isArray(post.amens) ? post.amens : [];
+        const comments = Array.isArray(post.comments) ? post.comments : [];
+        const hasAmen = currentUser && amens.includes(currentUser.username);
+        const canDelete = currentUser && (post.authorUsername === currentUser.username || isAdmin());
+        const badgeStyle = catBadge[post.category] || 'bg-slate-100 text-slate-700 border-slate-200';
+        const ytEmbed = getYoutubeEmbedUrl(post.videoUrl);
+
+        let videoHtml = '';
+        if (post.video) {
+          videoHtml = `
+            <div class="bg-black border-b border-slate-100 flex items-center justify-center">
+              <video src="${post.video}" controls playsinline class="w-full max-h-[580px]"></video>
+            </div>`;
+        } else if (ytEmbed) {
+          videoHtml = `
+            <div class="bg-black border-b border-slate-100 aspect-video w-full">
+              <iframe src="${ytEmbed}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>`;
+        } else if (post.videoUrl) {
+          if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(post.videoUrl)) {
+            videoHtml = `
+              <div class="bg-black border-b border-slate-100 flex items-center justify-center">
+                <video src="${escapeHtml(post.videoUrl)}" controls playsinline class="w-full max-h-[580px]"></video>
+              </div>`;
+          } else {
+            videoHtml = `
+              <a href="${escapeHtml(post.videoUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between gap-3 px-4 py-3 bg-indigo-50/70 border-b border-indigo-100 hover:bg-indigo-100/70 transition">
+                <span class="text-xs font-semibold text-indigo-800 truncate">🎬 Abrir vídeo externo</span>
+                <span class="text-[11px] font-bold text-indigo-600 shrink-0">Assistir →</span>
+              </a>`;
+          }
+        }
+
+        const commentsHtml = comments.map(c => {
+          const cu = usersMap[c.authorUsername] || {};
+          const cName = cu.name || c.authorName || 'Membro';
+          const canDelC = currentUser && (c.authorUsername === currentUser.username || isAdmin());
+          return `
+            <div class="flex items-start justify-between gap-2 text-xs bg-slate-50 px-3 py-2 rounded-lg">
+              <p class="text-slate-700 leading-snug">
+                <span class="font-bold text-slate-900 mr-1">${escapeHtml(cName)}</span>${escapeHtml(c.text)}
+              </p>
+              ${canDelC ? `<button onclick="deleteFeedComment('${post.id}', '${c.id}')" class="text-[10px] text-rose-500 hover:underline shrink-0 cursor-pointer" title="Excluir comentário">✕</button>` : ''}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <article class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-xs">
+            <!-- Post Header -->
+            <div class="px-4 py-3 flex items-center justify-between gap-2 border-b border-slate-100">
+              <div class="flex items-center gap-2.5 min-w-0">
+                ${avatar}
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-900 truncate">${escapeHtml(name)}</p>
+                  <p class="text-[10px] text-slate-500">${escapeHtml(cargo)} • ${dtStr}</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-0.5 text-[10px] font-semibold rounded-full border shrink-0 ${badgeStyle}">${escapeHtml(post.category)}</span>
+            </div>
+
+            <!-- Post Photo (Full Width, Instagram Style) -->
+            ${post.photo ? `
+              <div class="bg-slate-100 border-b border-slate-100 flex items-center justify-center">
+                <img src="${post.photo}" onclick="openFeedImageModal('${post.id}')" class="w-full max-h-[580px] object-contain cursor-zoom-in" title="Clique para ampliar" />
+              </div>
+            ` : ''}
+
+            <!-- Post Video -->
+            ${videoHtml}
+
+            <!-- Actions, Caption & Comments -->
+            <div class="p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <button onclick="toggleFeedAmen('${post.id}')" class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full border transition cursor-pointer ${hasAmen ? 'bg-[#0E7490] text-white border-[#0E7490]' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-cyan-50'}">
+                    <span>🙏 Amém</span>
+                    <span>(${amens.length})</span>
+                  </button>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-50 text-slate-600 border border-slate-200">
+                    💬 ${comments.length}
+                  </span>
+                </div>
+                ${canDelete ? `<button onclick="deleteFeedPost('${post.id}')" class="text-[11px] font-semibold text-rose-600 hover:underline cursor-pointer">Excluir</button>` : ''}
+              </div>
+              <p class="text-sm text-slate-800 whitespace-pre-line leading-relaxed">
+                <span class="font-bold text-slate-900 mr-1">${escapeHtml(name)}</span>${escapeHtml(post.text)}
+              </p>
+
+              <!-- Comments List -->
+              ${comments.length > 0 ? `<div class="space-y-1.5 pt-2 border-t border-slate-100">${commentsHtml}</div>` : ''}
+
+              <!-- Add Comment Form -->
+              <form onsubmit="addFeedComment(event, '${post.id}')" class="flex gap-2 pt-2 border-t border-slate-100">
+                <input id="feed-comment-input-${post.id}" type="text" required placeholder="Adicione um comentário..."
+                  class="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-full bg-slate-50 focus:bg-white focus:outline-none focus:border-[#0E7490]" />
+                <button type="submit" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-[#0E7490] hover:bg-[#155E75] text-white transition cursor-pointer">
+                  Enviar
+                </button>
+              </form>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function openFeedImageModal(postId) {
+      const post = getChurchFeed().find(p => p.id === postId);
+      if (!post || !post.photo) return;
+      document.getElementById('feed-lightbox-img').src = post.photo;
+      document.getElementById('feed-lightbox-caption').textContent = `${post.authorName || 'Membro'}: ${post.text || ''}`;
+      document.getElementById('feed-image-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeFeedImageModal() {
+      document.getElementById('feed-image-modal').classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 10.9. ABA MEMBROS & CARGOS (SOMENTE ADM)
+    // =========================================================================
+    let currentMembersQuickFilter = 'all';
+
+    function setMembersQuickFilter(filter) {
+      currentMembersQuickFilter = filter;
+      document.querySelectorAll('.mem-filter-btn').forEach(btn => {
+        const active = btn.dataset.memFilter === filter;
+        btn.className = active
+          ? 'mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-[#0E7490] text-white cursor-pointer'
+          : 'mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer';
+      });
+      renderMembersDirectory();
+      lucide.createIcons();
+    }
+
+    function renderMembersDirectory() {
+      if (!isAdmin()) return;
+      const cargos = getChurchCargos();
+      const users = Object.values(getUsersMap());
+      const rsvpMap = getChurchRsvpMap();
+      const nowMonth = new Date().getMonth() + 1;
+
+      const badge = document.getElementById('badge-members-dir');
+      if (badge) badge.textContent = users.length;
+
+      // Sync cargo filter dropdown without losing selection
+      const cargoSel = document.getElementById('members-filter-cargo');
+      if (cargoSel) {
+        const prev = cargoSel.value;
+        cargoSel.innerHTML = '<option value="">Todos os Cargos</option>' +
+          cargos.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+        if (prev && cargos.includes(prev)) cargoSel.value = prev;
+      }
+
+      const enriched = users.map(u => {
+        const cargo = u.cargo || (u.username === 'adm' ? cargos[0] : cargos[cargos.length - 1]);
+        const tenure = getChurchTenure(u.joinedDate || u.createdAt);
+        const stats = getMemberStats(u.username);
+        const rsvpCount = Object.values(rsvpMap).filter(arr => arr.some(x => x.username === u.username)).length;
+        const bMonth = u.birthDate ? parseInt(u.birthDate.split('-')[1], 10) : 0;
+        return { ...u, cargo, tenure, stats, rsvpCount, isBdayMonth: bMonth === nowMonth };
+      }).sort((a, b) => b.tenure.totalMonths - a.tenure.totalMonths);
+
+      // KPIs
+      const totalYears = Math.floor(enriched.reduce((s, u) => s + u.tenure.totalMonths, 0) / 12);
+      const bornCount = enriched.filter(u => u.bornInChurch).length;
+      const kpiTotal = document.getElementById('members-kpi-total');
+      const kpiCargos = document.getElementById('members-kpi-cargos');
+      const kpiYears = document.getElementById('members-kpi-years');
+      const kpiBorn = document.getElementById('members-kpi-born');
+      if (kpiTotal) kpiTotal.textContent = enriched.length;
+      if (kpiCargos) kpiCargos.textContent = cargos.length;
+      if (kpiYears) kpiYears.textContent = `${totalYears} anos`;
+      if (kpiBorn) kpiBorn.textContent = bornCount;
+
+      // Cargo distribution pills
+      const pillsEl = document.getElementById('members-cargo-pills');
+      if (pillsEl) {
+        pillsEl.innerHTML = cargos.map(c => {
+          const count = enriched.filter(u => u.cargo === c).length;
+          return `<button onclick="document.getElementById('members-filter-cargo').value='${escapeHtml(c)}'; renderMembersDirectory();" class="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-slate-50 hover:bg-cyan-50 border border-slate-200 text-slate-700 cursor-pointer">${escapeHtml(c)}: <span class="text-[#0E7490] font-bold">${count}</span></button>`;
+        }).join('');
+      }
+
+      // Apply search & filters
+      const q = (document.getElementById('members-search-input')?.value || '').trim().toLowerCase();
+      const cargoFilter = cargoSel ? cargoSel.value : '';
+      const filtered = enriched.filter(u => {
+        if (cargoFilter && u.cargo !== cargoFilter) return false;
+        if (currentMembersQuickFilter === 'born' && !u.bornInChurch) return false;
+        if (currentMembersQuickFilter === 'bday' && !u.isBdayMonth) return false;
+        if (currentMembersQuickFilter === 'admin' && u.role !== 'admin') return false;
+        if (q) {
+          const hay = `${u.name} ${u.username} ${u.matricula || ''} ${u.ministry || ''} ${u.cargo}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      const gridEl = document.getElementById('members-directory-grid');
+      if (!gridEl) return;
+      if (filtered.length === 0) {
+        gridEl.innerHTML = '<div class="card p-8 text-center text-sm text-slate-400 italic md:col-span-2 xl:col-span-3">Nenhum membro encontrado com os filtros selecionados.</div>';
+        return;
+      }
+
+      const fmtBr = iso => iso ? iso.split('-').reverse().join('/') : '—';
+      gridEl.innerHTML = filtered.map(u => {
+        const initials = u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+        const avatar = u.photo
+          ? `<img src="${u.photo}" class="w-12 h-12 rounded-full object-cover border-2 border-cyan-100 shrink-0" />`
+          : `<div class="w-12 h-12 rounded-full bg-[#0E7490] text-white text-sm font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+        const phoneDigits = (u.phone || '').replace(/\D/g, '');
+        const waHref = phoneDigits.length >= 10 ? `https://wa.me/${phoneDigits.startsWith('55') ? phoneDigits : '55' + phoneDigits}` : '';
+
+        return `
+          <div class="card p-5 flex flex-col justify-between gap-4 hover:shadow-md transition">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-3 min-w-0">
+                  ${avatar}
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-slate-900 truncate">${escapeHtml(u.name)}</p>
+                    <p class="text-xs text-slate-500 truncate">@${escapeHtml(u.username)}${u.matricula ? ' • ' + escapeHtml(u.matricula) : ''}</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  ${u.role === 'admin' ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-600 text-white">ADM</span>' : ''}
+                  ${u.bornInChurch ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800">🌱 Nascido na Igreja</span>' : ''}
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5">
+                <span class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-cyan-50 text-[#0E7490] border border-cyan-200">${escapeHtml(u.cargo)}</span>
+                ${u.ministry ? `<span class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(u.ministry)}</span>` : ''}
+                ${u.tenure.isAnnivMonth ? '<span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-100 text-amber-800">Aniv. Igreja 🎉</span>' : ''}
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div>
+                  <span class="text-[10px] text-slate-400 block">Nascimento</span>
+                  <span class="font-semibold text-slate-700">🎂 ${fmtBr(u.birthDate)}</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block">Entrada na Igreja</span>
+                  <span class="font-semibold text-slate-700">⛪ ${fmtBr(u.joinedDate || u.createdAt)}</span>
+                </div>
+                <div class="col-span-2 pt-1 border-t border-slate-200/70 flex items-center justify-between">
+                  <span class="text-[11px] text-slate-500">Tempo de Casa:</span>
+                  <span class="text-xs font-bold text-[#0E7490]">⏳ ${u.tenure.label}</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-4 gap-1.5 text-center text-[11px]">
+                <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-800">
+                  <div class="font-bold">${u.stats.daysMonth}d</div>
+                  <div class="text-[9px]">Mês</div>
+                </div>
+                <div class="p-1.5 rounded-lg bg-cyan-50 text-[#0E7490]">
+                  <div class="font-bold">${u.stats.chapters}</div>
+                  <div class="text-[9px]">Caps</div>
+                </div>
+                <div class="p-1.5 rounded-lg bg-amber-50 text-amber-800">
+                  <div class="font-bold">${u.stats.prayers}</div>
+                  <div class="text-[9px]">Orações</div>
+                </div>
+                <div class="p-1.5 rounded-lg bg-indigo-50 text-indigo-800">
+                  <div class="font-bold">${u.rsvpCount}</div>
+                  <div class="text-[9px]">Presenças</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+              ${waHref
+                ? `<a href="${waHref}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline">📱 ${escapeHtml(u.phone)}</a>`
+                : `<span class="text-xs text-slate-400">${u.phone ? escapeHtml(u.phone) : 'Sem telefone'}</span>`}
+              <button onclick="openEditMemberModal('${u.username}')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition cursor-pointer">
+                Editar Cadastro
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function refreshAllUI() {
       renderOverviewKPIs();
       renderChurchPeriodSummaries();
       renderMonthlyBirthdays();
       renderChurchCuriosities();
+      renderChurchFeed();
       renderEventsPanel();
       renderPrayers();
       renderFavorites();
@@ -4608,12 +5805,38 @@
         : 'IA Gemini: Opcional (Offline ativo)';
       if (!document.getElementById('tab-overview').classList.contains('hidden')) renderCharts();
       if (!document.getElementById('tab-agenda').classList.contains('hidden')) renderCalendar();
-      if (isAdmin()) renderAdminPanel();
+      if (isAdmin()) {
+        renderMembersDirectory();
+        renderAdminPanel();
+      }
       lucide.createIcons();
     }
 
 
+    // =========================================================================
+    // 10.10. MODO CLARO / ESCURO (DARK MODE)
+    // =========================================================================
+    const THEME_KEY = 'painel_biblico_theme_v1';
+
+    function applyTheme(mode) {
+      const isDark = mode === 'dark';
+      document.body.classList.toggle('dark', isDark);
+      const icon = document.getElementById('theme-toggle-icon');
+      if (icon) icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      const btn = document.getElementById('theme-toggle-btn');
+      if (btn) btn.title = isDark ? 'Mudar para Modo Claro' : 'Mudar para Modo Escuro';
+      lucide.createIcons();
+    }
+
+    function toggleDarkMode() {
+      const next = document.body.classList.contains('dark') ? 'light' : 'dark';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+      if (!document.getElementById('tab-overview').classList.contains('hidden')) renderCharts();
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
+      applyTheme(localStorage.getItem(THEME_KEY) || 'light');
       await initCloudSync();
       await ensureDefaultAdmin();
       initCounselorChips();
