@@ -3696,8 +3696,11 @@
       if (!state.chaptersRead.includes(key)) state.chaptersRead.push(key);
       const today = todayISO();
       if (!state.readDays.includes(today)) state.readDays.push(today);
+      const syncedCount = syncPlansFromChaptersRead();
       saveState();
-      showToast('Capítulo registrado e leitura de hoje concluída!');
+      showToast(syncedCount > 0
+        ? `Leitura concluída e marcada em ${syncedCount} ${syncedCount === 1 ? 'plano' : 'planos'}!`
+        : 'Capítulo registrado e leitura de hoje concluída!');
     }
 
     function prevChapter() {
@@ -3778,7 +3781,8 @@
           title: `${slice.length} ${slice.length === 1 ? 'capítulo' : 'capítulos'}`,
           book: first.book,
           ch: first.ch,
-          ref
+          ref,
+          keys: slice.map(x => `${x.book}:${x.ch}`)
         });
       }
       return days;
@@ -3798,7 +3802,8 @@
           title: `Sabedoria & Louvor • Salmos ${psCh}`,
           book: 'pv',
           ch: d,
-          ref: `Provérbios ${d} & Salmos ${psCh}`
+          ref: `Provérbios ${d} & Salmos ${psCh}`,
+          keys: [`pv:${d}`, `sl:${psCh}`]
         };
       });
 
@@ -4042,11 +4047,40 @@
       }).join('');
     }
 
+    function syncPlansFromChaptersRead() {
+      const readSet = new Set(state.chaptersRead || []);
+      let newlyMarked = 0;
+      getAllReadingPlans().forEach(plan => {
+        const doneArr = getPlanDoneArray(plan.id);
+        plan.days.forEach(item => {
+          const reqKeys = item.keys || [`${item.book}:${item.ch}`];
+          if (reqKeys.every(k => readSet.has(k)) && !doneArr.includes(item.day)) {
+            doneArr.push(item.day);
+            newlyMarked++;
+          }
+        });
+      });
+      return newlyMarked;
+    }
+
     function togglePlanDay(day, planId = state.activePlanId || 'devocional30') {
       const arr = getPlanDoneArray(planId);
       const idx = arr.indexOf(day);
-      if (idx === -1) arr.push(day);
-      else arr.splice(idx, 1);
+      if (idx === -1) {
+        arr.push(day);
+        const today = todayISO();
+        if (!state.readDays.includes(today)) state.readDays.push(today);
+        const plan = getAllReadingPlans().find(p => p.id === planId);
+        const item = plan?.days.find(d => d.day === day);
+        if (item) {
+          const reqKeys = item.keys || [`${item.book}:${item.ch}`];
+          reqKeys.forEach(k => {
+            if (!state.chaptersRead.includes(k)) state.chaptersRead.push(k);
+          });
+        }
+      } else {
+        arr.splice(idx, 1);
+      }
       saveState();
     }
 
