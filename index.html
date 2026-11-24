@@ -1275,6 +1275,7 @@
         <div class="card p-4 border-l-4 border-l-[#0E7490]">
           <span class="text-xs font-semibold text-slate-500">Total de Membros</span>
           <div id="members-kpi-total" class="text-2xl font-bold text-[#0E7490] mt-1">0</div>
+          <div id="members-kpi-status" class="text-[11px] font-semibold mt-1 text-slate-500">🟢 0 ativos • 🔴 0 inativos</div>
         </div>
         <div class="card p-4 border-l-4 border-l-indigo-600">
           <span class="text-xs font-semibold text-slate-500">Cargos na Igreja</span>
@@ -1325,6 +1326,8 @@
           <button onclick="setMembersQuickFilter('born')" data-mem-filter="born" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🌱 Nascidos na Igreja</button>
           <button onclick="setMembersQuickFilter('bday')" data-mem-filter="bday" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🎂 Aniversariantes do Mês</button>
           <button onclick="setMembersQuickFilter('admin')" data-mem-filter="admin" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🛡️ Administradores</button>
+          <button onclick="setMembersQuickFilter('active')" data-mem-filter="active" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🟢 Ativos (<span id="members-count-active">0</span>)</button>
+          <button onclick="setMembersQuickFilter('inactive')" data-mem-filter="inactive" class="mem-filter-btn px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">🔴 Inativos (<span id="members-count-inactive">0</span>)</button>
         </div>
 
         <!-- Cargo Distribution Pills -->
@@ -1342,6 +1345,7 @@
         <div class="card p-4 border-l-4 border-l-indigo-600">
           <span class="text-xs font-semibold text-slate-500">Membros Cadastrados</span>
           <div id="adm-kpi-members" class="text-2xl font-bold text-indigo-700 mt-1">0</div>
+          <div id="adm-kpi-status-sub" class="text-[11px] font-semibold mt-1 text-slate-500">🟢 0 ativos • 🔴 0 inativos</div>
         </div>
         <div class="card p-4 border-l-4 border-l-[#10B981]">
           <span class="text-xs font-semibold text-slate-500">Leram a Bíblia Hoje</span>
@@ -1468,12 +1472,31 @@
                   class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600" />
               </div>
             </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Permissão no Sistema</label>
-              <select id="adm-mem-role" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white font-medium text-slate-700">
-                <option value="user" selected>Membro (Padrão)</option>
-                <option value="admin">Administrador (ADM — Acesso Total)</option>
-              </select>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Permissão no Sistema</label>
+                <select id="adm-mem-role" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white font-medium text-slate-700">
+                  <option value="user" selected>Membro (Padrão)</option>
+                  <option value="admin">Administrador (ADM — Acesso Total)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Status na Igreja</label>
+                <select id="adm-mem-status" onchange="toggleInactiveSinceField('adm')" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white font-semibold text-emerald-700">
+                  <option value="active" selected>🟢 Ativo</option>
+                  <option value="inactive">🔴 Inativo</option>
+                </select>
+              </div>
+            </div>
+            <div id="adm-mem-inactive-wrap" class="hidden p-3 rounded-xl bg-rose-50/70 border border-rose-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-rose-800 mb-1">Data de Saída / Inativação</label>
+                <input id="adm-mem-inactive-since" type="date" class="w-full px-2.5 py-1.5 text-xs border border-rose-200 rounded-lg bg-white" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-rose-800 mb-1">Motivo (opcional)</label>
+                <input id="adm-mem-inactive-reason" type="text" placeholder="Ex: Mudança, afastamento..." class="w-full px-2.5 py-1.5 text-xs border border-rose-200 rounded-lg bg-white" />
+              </div>
             </div>
             <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition cursor-pointer">
               Cadastrar Membro
@@ -1590,6 +1613,87 @@
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Comparativo de Engajamento (Top 8 Membros)</h3>
           <div class="h-64">
             <canvas id="chart-adm-engagement"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAIXA ETÁRIA DOS MEMBROS (PLANEJAMENTO DE EVENTOS POR IDADE) -->
+      <div class="card p-5 sm:p-6 border-t-4 border-t-emerald-500 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-[#0E7490] flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4"></i>
+              Faixa Etária da Igreja (Eventos por Idade)
+            </h2>
+            <p class="text-xs text-slate-500">Distribuição etária dos membros ativos para planejar cultos, encontros e eventos focados em cada idade.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="adm-age-active-count" class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">0 ativos</span>
+            <span id="adm-age-inactive-count" class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">0 inativos</span>
+            <span id="adm-age-avg" class="px-2.5 py-1 text-xs font-bold rounded-full bg-cyan-50 text-[#0E7490] border border-cyan-200">Média: -- anos</span>
+          </div>
+        </div>
+
+        <div id="adm-age-cards" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+
+        <div class="p-4 rounded-xl bg-slate-50/50 border border-slate-200">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Gráfico por Faixa Etária (Membros Ativos)</h3>
+          <div class="h-56">
+            <canvas id="chart-adm-age-groups"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD DE MOVIMENTAÇÃO, RETENÇÃO & INATIVIDADE -->
+      <div class="card p-5 sm:p-6 border-t-4 border-t-rose-500 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-rose-500"></i>
+              Dashboard de Movimentação, Retenção &amp; Inatividade (ADM)
+            </h2>
+            <p class="text-xs text-slate-500">Acompanhe entradas, saídas, há quanto tempo cada membro está inativo e a taxa de retenção da igreja.</p>
+          </div>
+        </div>
+
+        <!-- 4 Executive KPIs -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200">
+            <span class="text-xs font-semibold text-slate-600">Taxa de Retenção</span>
+            <div id="adm-ret-rate" class="text-2xl font-bold text-emerald-700 mt-1">100%</div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Membros ativos no total</p>
+          </div>
+          <div class="p-4 rounded-xl bg-cyan-50/70 border border-cyan-200">
+            <span class="text-xs font-semibold text-slate-600">Ativos • Casa Média</span>
+            <div id="adm-ret-active" class="text-2xl font-bold text-[#0E7490] mt-1">0</div>
+            <p id="adm-ret-active-sub" class="text-[11px] text-slate-500 mt-0.5">Média: --</p>
+          </div>
+          <div class="p-4 rounded-xl bg-rose-50/70 border border-rose-200">
+            <span class="text-xs font-semibold text-slate-600">Inativos / Saídas</span>
+            <div id="adm-ret-inactive" class="text-2xl font-bold text-rose-700 mt-1">0</div>
+            <p id="adm-ret-inactive-sub" class="text-[11px] text-slate-500 mt-0.5">Tempo médio inativo: --</p>
+          </div>
+          <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200">
+            <span class="text-xs font-semibold text-slate-600">Saídas (Últimos 30d)</span>
+            <div id="adm-ret-recent" class="text-2xl font-bold text-amber-700 mt-1">0</div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Atenção pastoral recente</p>
+          </div>
+        </div>
+
+        <!-- Chart + Inactive Details List -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div class="p-4 rounded-xl bg-slate-50/50 border border-slate-200 lg:col-span-5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Entradas vs Saídas (Últimos 6 Meses)</h3>
+            <div class="h-64">
+              <canvas id="chart-adm-retention"></canvas>
+            </div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-50/50 border border-slate-200 lg:col-span-7 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-rose-700">Histórico de Membros Inativos (Quando Saiu &amp; Duração)</h3>
+              <span id="adm-inactive-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-100 text-rose-700">0 inativos</span>
+            </div>
+            <div id="adm-inactive-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
           </div>
         </div>
       </div>
@@ -1827,12 +1931,32 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Permissão no Sistema</label>
-          <select id="edit-mem-role" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white font-medium text-slate-700">
-            <option value="user">Membro (Padrão)</option>
-            <option value="admin">Administrador (ADM — Acesso Total)</option>
-          </select>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Permissão no Sistema</label>
+            <select id="edit-mem-role" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white font-medium text-slate-700">
+              <option value="user">Membro (Padrão)</option>
+              <option value="admin">Administrador (ADM — Acesso Total)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Status na Igreja</label>
+            <select id="edit-mem-status" onchange="toggleInactiveSinceField('edit')" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white font-semibold text-slate-700">
+              <option value="active">🟢 Ativo</option>
+              <option value="inactive">🔴 Inativo</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="edit-mem-inactive-wrap" class="hidden p-3 rounded-xl bg-rose-50/70 border border-rose-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-rose-800 mb-1">Data de Saída / Inativação</label>
+            <input id="edit-mem-inactive-since" type="date" class="w-full px-2.5 py-1.5 text-xs border border-rose-200 rounded-lg bg-white" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-rose-800 mb-1">Motivo (opcional)</label>
+            <input id="edit-mem-inactive-reason" type="text" placeholder="Ex: Mudança, afastamento..." class="w-full px-2.5 py-1.5 text-xs border border-rose-200 rounded-lg bg-white" />
+          </div>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
@@ -2876,7 +3000,8 @@
 
       const users = getUsersMap();
       const user = users[username];
-      if (!user) return showAuthError('Usuário não encontrado. Verifique ou crie uma conta.');
+      if (!user) return showAuthError('Usuário não encontrado. Verifique os dados informados.');
+      if (user.status === 'inactive') return showAuthError('Esta conta está INATIVA. Procure a administração da igreja.');
 
       const passHash = await hashPassword(username, pass);
       if (passHash !== user.passHash) return showAuthError('Senha incorreta. Tente novamente.');
@@ -4859,6 +4984,37 @@
       reader.readAsDataURL(file);
     }
 
+    function toggleInactiveSinceField(prefix) {
+      const status = document.getElementById(`${prefix}-mem-status`)?.value || 'active';
+      const wrap = document.getElementById(`${prefix}-mem-inactive-wrap`);
+      const dateInp = document.getElementById(`${prefix}-mem-inactive-since`);
+      if (!wrap) return;
+      const isInactive = status === 'inactive';
+      wrap.classList.toggle('hidden', !isInactive);
+      if (isInactive && dateInp && !dateInp.value) {
+        dateInp.value = todayISO();
+      }
+    }
+
+    function formatInactiveDuration(isoDate) {
+      if (!isoDate) return { days: 0, label: 'data não informada' };
+      const [y, m, d] = isoDate.split('-').map(Number);
+      const start = new Date(y, (m || 1) - 1, d || 1);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diffDays = Math.max(0, Math.round((today - start) / 86400000));
+      if (diffDays === 0) return { days: 0, label: 'desde hoje' };
+      if (diffDays < 30) return { days: diffDays, label: `há ${diffDays} ${diffDays === 1 ? 'dia' : 'dias'}` };
+      const months = Math.floor(diffDays / 30);
+      const remDays = diffDays % 30;
+      if (months < 12) {
+        return { days: diffDays, label: remDays > 0 ? `há ${months} ${months === 1 ? 'mês' : 'meses'} e ${remDays}d` : `há ${months} ${months === 1 ? 'mês' : 'meses'}` };
+      }
+      const years = Math.floor(months / 12);
+      const remMonths = months % 12;
+      return { days: diffDays, label: remMonths > 0 ? `há ${years} ${years === 1 ? 'ano' : 'anos'} e ${remMonths}m` : `há ${years} ${years === 1 ? 'ano' : 'anos'}` };
+    }
+
     function syncBornInChurch(cbId, birthId, joinedId) {
       const checked = document.getElementById(cbId).checked;
       const birthVal = document.getElementById(birthId).value;
@@ -4882,6 +5038,9 @@
       const anointings = getCleanAnointings('adm');
       const cargo = document.getElementById('adm-mem-cargo').value;
       const role = document.getElementById('adm-mem-role').value || 'user';
+      const status = document.getElementById('adm-mem-status')?.value || 'active';
+      const inactiveSince = status === 'inactive' ? (document.getElementById('adm-mem-inactive-since')?.value || todayISO()) : '';
+      const inactiveReason = status === 'inactive' ? (document.getElementById('adm-mem-inactive-reason')?.value.trim() || '') : '';
       const ministry = document.getElementById('adm-mem-ministry').value.trim();
       const phone = document.getElementById('adm-mem-phone').value.trim();
 
@@ -4900,13 +5059,14 @@
         username, name, matricula: autoMat, birthDate, joinedDate, bornInChurch,
         baptismDate, baptismPlace, anointings,
         photo: pendingMemberPhotoDataUrl || '',
-        role, cargo, ministry, phone, passHash, createdAt: todayISO()
+        role, status, inactiveSince, inactiveReason, cargo, ministry, phone, passHash, createdAt: todayISO()
       };
       saveUsersMap(users);
       e.target.reset();
       pendingMemberPhotoDataUrl = '';
       anointingDrafts.adm = [];
       renderAnointingsInputs('adm');
+      toggleInactiveSinceField('adm');
       document.getElementById('adm-mem-photo-preview').innerHTML = '<i data-lucide="camera" class="w-5 h-5"></i>';
       document.getElementById('adm-mem-pass').value = '1234';
       renderAdminPanel();
@@ -4970,8 +5130,12 @@
         return { ...u, cargo: u.cargo || (u.username === 'adm' ? cargos[0] : cargos[cargos.length - 1]), stats, rsvpCount };
       });
 
+      const activeTotal = enriched.filter(u => u.status !== 'inactive').length;
+      const inactiveTotal = enriched.length - activeTotal;
       document.getElementById('badge-admin-members').textContent = users.length;
       document.getElementById('adm-kpi-members').textContent = users.length;
+      const admStatusSub = document.getElementById('adm-kpi-status-sub');
+      if (admStatusSub) admStatusSub.innerHTML = `<span class="text-emerald-600">🟢 ${activeTotal} ativos</span> • <span class="text-rose-600">🔴 ${inactiveTotal} inativos</span>`;
       document.getElementById('adm-kpi-active-today').textContent = activeToday;
       document.getElementById('adm-kpi-prayers').textContent = totalPrayers;
       document.getElementById('adm-kpi-rsvps').textContent = totalRsvps;
@@ -5038,7 +5202,7 @@
             <div class="flex items-center gap-2.5 min-w-0">
               ${avatar}
               <div class="min-w-0">
-                <p class="text-sm font-bold text-slate-800 truncate">${u.name} ${u.role === 'admin' ? '<span class="ml-1 px-1.5 py-0.5 text-[9px] font-bold rounded bg-indigo-600 text-white">ADM</span>' : ''} <span class="text-xs font-normal text-slate-400">@${u.username}</span></p>
+                <p class="text-sm font-bold text-slate-800 truncate">${u.name} ${u.status === 'inactive' ? '<span class="ml-1 px-1.5 py-0.5 text-[9px] font-bold rounded bg-rose-100 text-rose-700 border border-rose-200">Inativo</span>' : '<span class="ml-1 px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-100 text-emerald-700 border border-emerald-200">Ativo</span>'} ${u.role === 'admin' ? '<span class="ml-1 px-1.5 py-0.5 text-[9px] font-bold rounded bg-indigo-600 text-white">ADM</span>' : ''} <span class="text-xs font-normal text-slate-400">@${u.username}</span></p>
                 <p class="text-[11px] text-slate-500 truncate">${u.matricula ? u.matricula + ' • ' : ''}${u.ministry || 'Sem ministério'}${u.phone ? ' • ' + u.phone : ''}</p>
               </div>
             </div>
@@ -5078,7 +5242,217 @@
         </div>
       `}).join('');
       renderAdminEngagementAnalytics(enriched);
+      renderAdminAgeGroups(enriched);
+      renderAdminRetentionDashboard(enriched);
       lucide.createIcons();
+    }
+
+    let chartAdmAgeGroups = null;
+
+    function getMemberAgeYears(birthDateStr) {
+      if (!birthDateStr) return null;
+      const parts = birthDateStr.split('-').map(Number);
+      if (parts.length < 3 || !parts[0] || parts[0] < 1900) return null;
+      const [y, m, d] = parts;
+      const now = new Date();
+      let age = now.getFullYear() - y;
+      if (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d)) age--;
+      return age >= 0 && age <= 120 ? age : null;
+    }
+
+    function renderAdminAgeGroups(enriched) {
+      const cardsEl = document.getElementById('adm-age-cards');
+      const countBadge = document.getElementById('adm-age-active-count');
+      const avgBadge = document.getElementById('adm-age-avg');
+      if (!cardsEl) return;
+
+      const activeMembers = enriched.filter(u => u.status !== 'inactive');
+      const groups = [
+        { id: 'criancas', label: 'Crianças', range: '0–11 anos', min: 0, max: 11, color: '#0EA5E9', count: 0 },
+        { id: 'adolescentes', label: 'Adolescentes', range: '12–17 anos', min: 12, max: 17, color: '#8B5CF6', count: 0 },
+        { id: 'jovens', label: 'Jovens', range: '18–29 anos', min: 18, max: 29, color: '#0E7490', count: 0 },
+        { id: 'adultos', label: 'Adultos', range: '30–59 anos', min: 30, max: 59, color: '#10B981', count: 0 },
+        { id: 'idosos', label: 'Idosos', range: '60+ anos', min: 60, max: 150, color: '#F59E0B', count: 0 },
+        { id: 'sem_data', label: 'Sem Data', range: 'Não informado', min: -1, max: -1, color: '#94A3B8', count: 0 }
+      ];
+
+      let ageSum = 0;
+      let ageKnownCount = 0;
+      activeMembers.forEach(u => {
+        const age = getMemberAgeYears(u.birthDate);
+        if (age === null) {
+          groups[5].count++;
+        } else {
+          ageSum += age;
+          ageKnownCount++;
+          const g = groups.find(x => x.min >= 0 && age >= x.min && age <= x.max);
+          if (g) g.count++;
+        }
+      });
+
+      const totalActive = activeMembers.length;
+      const totalInactive = enriched.length - totalActive;
+      const avgAge = ageKnownCount > 0 ? Math.round(ageSum / ageKnownCount) : null;
+      const inactBadge = document.getElementById('adm-age-inactive-count');
+      if (countBadge) countBadge.textContent = `${totalActive} ativos`;
+      if (inactBadge) inactBadge.textContent = `${totalInactive} inativos`;
+      if (avgBadge) avgBadge.textContent = avgAge !== null ? `Média: ${avgAge} anos` : 'Média: -- anos';
+
+      cardsEl.innerHTML = groups.map(g => {
+        const pct = totalActive > 0 ? Math.round((g.count / totalActive) * 100) : 0;
+        return `
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800">${g.label}</span>
+              <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${g.color};"></span>
+            </div>
+            <div class="text-xl font-bold" style="color: ${g.color};">${g.count}</div>
+            <div class="text-[10px] text-slate-500">${g.range} • ${pct}%</div>
+          </div>
+        `;
+      }).join('');
+
+      const canvas = document.getElementById('chart-adm-age-groups');
+      if (canvas && window.Chart) {
+        const isDark = document.body.classList.contains('dark');
+        const tickColor = isDark ? '#94A3B8' : '#475569';
+        const gridColor = isDark ? 'rgba(148,163,184,0.12)' : 'rgba(15,23,42,0.06)';
+        if (chartAdmAgeGroups) chartAdmAgeGroups.destroy();
+        chartAdmAgeGroups = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: groups.map(g => `${g.label} (${g.range})`),
+            datasets: [{
+              label: 'Membros Ativos',
+              data: groups.map(g => g.count),
+              backgroundColor: groups.map(g => g.color),
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { display: false } },
+              y: { beginAtZero: true, ticks: { color: tickColor, precision: 0 }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
+    }
+
+    let chartAdmRetention = null;
+
+    function renderAdminRetentionDashboard(enriched) {
+      const total = enriched.length;
+      const activeList = enriched.filter(u => u.status !== 'inactive');
+      const inactiveList = enriched.filter(u => u.status === 'inactive');
+
+      const rate = total > 0 ? Math.round((activeList.length / total) * 100) : 100;
+      const avgActiveMonths = activeList.length > 0
+        ? Math.round(activeList.reduce((s, u) => s + getChurchTenure(u.joinedDate || u.createdAt).totalMonths, 0) / activeList.length)
+        : 0;
+      const avgActiveLabel = avgActiveMonths >= 12
+        ? `${Math.floor(avgActiveMonths / 12)}a ${avgActiveMonths % 12}m`
+        : `${avgActiveMonths}m`;
+
+      const inactiveWithDur = inactiveList.map(u => {
+        const since = u.inactiveSince || u.createdAt || todayISO();
+        const dur = formatInactiveDuration(since);
+        return { ...u, since, dur };
+      }).sort((a, b) => a.dur.days - b.dur.days);
+
+      const avgInactDays = inactiveWithDur.length > 0
+        ? Math.round(inactiveWithDur.reduce((s, u) => s + u.dur.days, 0) / inactiveWithDur.length)
+        : 0;
+      const recent30 = inactiveWithDur.filter(u => u.dur.days <= 30).length;
+
+      const elRate = document.getElementById('adm-ret-rate');
+      const elAct = document.getElementById('adm-ret-active');
+      const elActSub = document.getElementById('adm-ret-active-sub');
+      const elInact = document.getElementById('adm-ret-inactive');
+      const elInactSub = document.getElementById('adm-ret-inactive-sub');
+      const elRec = document.getElementById('adm-ret-recent');
+      const elBadge = document.getElementById('adm-inactive-badge');
+
+      if (elRate) elRate.textContent = `${rate}%`;
+      if (elAct) elAct.textContent = activeList.length;
+      if (elActSub) elActSub.textContent = `Casa média: ${avgActiveLabel}`;
+      if (elInact) elInact.textContent = inactiveList.length;
+      if (elInactSub) elInactSub.textContent = inactiveList.length > 0 ? `Média inativo: ${avgInactDays}d` : 'Nenhuma saída registrada';
+      if (elRec) elRec.textContent = recent30;
+      if (elBadge) elBadge.textContent = `${inactiveList.length} ${inactiveList.length === 1 ? 'inativo' : 'inativos'}`;
+
+      // Render Inactive Members List
+      const listEl = document.getElementById('adm-inactive-list');
+      if (listEl) {
+        if (inactiveWithDur.length === 0) {
+          listEl.innerHTML = '<p class="text-xs text-slate-400 italic py-6 text-center">Nenhum membro inativo no momento! 🎉</p>';
+        } else {
+          const fmtBr = iso => iso ? iso.split('-').reverse().join('/') : '—';
+          listEl.innerHTML = inactiveWithDur.map(u => {
+            const initials = u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+            const avatar = u.photo
+              ? `<img src="${u.photo}" class="w-9 h-9 rounded-full object-cover border border-rose-200 shrink-0 grayscale" />`
+              : `<div class="w-9 h-9 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+            return `
+              <div class="p-3 rounded-xl bg-white border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  ${avatar}
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(u.name)} <span class="font-normal text-slate-400">• ${escapeHtml(u.cargo)}</span></p>
+                    <p class="text-[11px] text-rose-700 font-semibold">🔴 Saiu em ${fmtBr(u.since)} (${u.dur.label})</p>
+                    <p class="text-[10px] text-slate-500">⛪ Entrou: ${fmtBr(u.joinedDate || u.createdAt)}${u.inactiveReason ? ' • Motivo: ' + escapeHtml(u.inactiveReason) : ''}</p>
+                  </div>
+                </div>
+                <button onclick="openEditMemberModal('${u.username}')" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-rose-50 hover:bg-emerald-50 text-rose-700 hover:text-emerald-700 border border-rose-200 hover:border-emerald-200 transition cursor-pointer shrink-0">
+                  Editar / Reativar
+                </button>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Render 6-Month Entries vs Exits Chart
+      const canvas = document.getElementById('chart-adm-retention');
+      if (canvas && window.Chart) {
+        const now = new Date();
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          const label = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+          const entries = enriched.filter(u => (u.joinedDate || u.createdAt || '').startsWith(ym)).length;
+          const exits = inactiveWithDur.filter(u => (u.since || '').startsWith(ym)).length;
+          months.push({ label, entries, exits });
+        }
+
+        const isDark = document.body.classList.contains('dark');
+        const tickColor = isDark ? '#94A3B8' : '#475569';
+        const gridColor = isDark ? 'rgba(148,163,184,0.12)' : 'rgba(15,23,42,0.06)';
+        if (chartAdmRetention) chartAdmRetention.destroy();
+        chartAdmRetention = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: months.map(m => m.label.toUpperCase()),
+            datasets: [
+              { label: 'Entradas', data: months.map(m => m.entries), backgroundColor: '#10B981', borderRadius: 6 },
+              { label: 'Saídas / Inativações', data: months.map(m => m.exits), backgroundColor: '#EF4444', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: tickColor, font: { size: 11 } } } },
+            scales: {
+              x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { display: false } },
+              y: { beginAtZero: true, ticks: { color: tickColor, precision: 0 }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
     }
 
     let chartAdmEngagement = null;
@@ -5320,6 +5694,16 @@
       document.getElementById('edit-mem-phone').value = u.phone || '';
       document.getElementById('edit-mem-role').value = u.role === 'admin' ? 'admin' : 'user';
       document.getElementById('edit-mem-role').disabled = u.username === 'adm';
+      const statusSel = document.getElementById('edit-mem-status');
+      if (statusSel) {
+        statusSel.value = u.status === 'inactive' ? 'inactive' : 'active';
+        statusSel.disabled = u.username === 'adm';
+      }
+      const inactDate = document.getElementById('edit-mem-inactive-since');
+      const inactReason = document.getElementById('edit-mem-inactive-reason');
+      if (inactDate) inactDate.value = u.inactiveSince || '';
+      if (inactReason) inactReason.value = u.inactiveReason || '';
+      toggleInactiveSinceField('edit');
       document.getElementById('edit-mem-pass').value = '';
       editMemberPhotoDataUrl = u.photo || '';
       document.getElementById('edit-mem-photo-preview').innerHTML = editMemberPhotoDataUrl
@@ -5402,6 +5786,9 @@
       u.ministry = document.getElementById('edit-mem-ministry').value.trim();
       u.phone = document.getElementById('edit-mem-phone').value.trim();
       u.role = newUsername === 'adm' ? 'admin' : document.getElementById('edit-mem-role').value;
+      u.status = newUsername === 'adm' ? 'active' : (document.getElementById('edit-mem-status')?.value || 'active');
+      u.inactiveSince = u.status === 'inactive' ? (document.getElementById('edit-mem-inactive-since')?.value || todayISO()) : '';
+      u.inactiveReason = u.status === 'inactive' ? (document.getElementById('edit-mem-inactive-reason')?.value.trim() || '') : '';
       u.photo = editMemberPhotoDataUrl;
 
       if (newPass && newPass.length >= 4) {
@@ -6418,11 +6805,19 @@
       // KPIs
       const totalYears = Math.floor(enriched.reduce((s, u) => s + u.tenure.totalMonths, 0) / 12);
       const bornCount = enriched.filter(u => u.bornInChurch).length;
+      const activeCount = enriched.filter(u => u.status !== 'inactive').length;
+      const inactiveCount = enriched.length - activeCount;
       const kpiTotal = document.getElementById('members-kpi-total');
+      const kpiStatus = document.getElementById('members-kpi-status');
+      const cntAct = document.getElementById('members-count-active');
+      const cntInact = document.getElementById('members-count-inactive');
       const kpiCargos = document.getElementById('members-kpi-cargos');
       const kpiYears = document.getElementById('members-kpi-years');
       const kpiBorn = document.getElementById('members-kpi-born');
       if (kpiTotal) kpiTotal.textContent = enriched.length;
+      if (kpiStatus) kpiStatus.innerHTML = `<span class="text-emerald-600">🟢 ${activeCount} ativos</span> • <span class="text-rose-600">🔴 ${inactiveCount} inativos</span>`;
+      if (cntAct) cntAct.textContent = activeCount;
+      if (cntInact) cntInact.textContent = inactiveCount;
       if (kpiCargos) kpiCargos.textContent = cargos.length;
       if (kpiYears) kpiYears.textContent = `${totalYears} anos`;
       if (kpiBorn) kpiBorn.textContent = bornCount;
@@ -6444,6 +6839,8 @@
         if (currentMembersQuickFilter === 'born' && !u.bornInChurch) return false;
         if (currentMembersQuickFilter === 'bday' && !u.isBdayMonth) return false;
         if (currentMembersQuickFilter === 'admin' && u.role !== 'admin') return false;
+        if (currentMembersQuickFilter === 'active' && u.status === 'inactive') return false;
+        if (currentMembersQuickFilter === 'inactive' && u.status !== 'inactive') return false;
         if (q) {
           const hay = `${u.name} ${u.username} ${u.matricula || ''} ${u.ministry || ''} ${u.cargo}`.toLowerCase();
           if (!hay.includes(q)) return false;
@@ -6479,6 +6876,9 @@
                   </div>
                 </div>
                 <div class="flex flex-col items-end gap-1 shrink-0">
+                  ${u.status === 'inactive'
+                    ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-100 text-rose-700 border border-rose-200">🔴 Inativo</span>'
+                    : '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-700 border border-emerald-200">🟢 Ativo</span>'}
                   ${u.role === 'admin' ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-600 text-white">ADM</span>' : ''}
                   ${u.bornInChurch ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800">🌱 Nascido na Igreja</span>' : ''}
                 </div>
@@ -6503,6 +6903,11 @@
                   <span class="text-[11px] text-slate-500">Tempo de Casa:</span>
                   <span class="text-xs font-bold text-[#0E7490]">⏳ ${u.tenure.label}</span>
                 </div>
+                ${u.status === 'inactive' ? `
+                  <div class="col-span-2 pt-1 border-t border-rose-200/70 text-[11px] text-rose-700 font-semibold">
+                    🔴 Inativo desde ${fmtBr(u.inactiveSince || u.createdAt)} (${formatInactiveDuration(u.inactiveSince || u.createdAt).label})${u.inactiveReason ? ' • ' + escapeHtml(u.inactiveReason) : ''}
+                  </div>
+                ` : ''}
                 ${(u.baptismDate || u.baptismPlace) ? `
                   <div class="col-span-2 pt-1 border-t border-slate-200/70 text-[11px] text-slate-600">
                     💧 <span class="font-semibold">Batismo:</span> ${fmtBr(u.baptismDate)}${u.baptismPlace ? ' • ' + escapeHtml(u.baptismPlace) : ''}
