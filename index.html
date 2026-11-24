@@ -126,7 +126,8 @@
     body.dark #edit-member-modal > div,
     body.dark #cargos-modal > div,
     body.dark #sos-modal > div,
-    body.dark #welcome-tour-modal > div {
+    body.dark #welcome-tour-modal > div,
+    body.dark #share-feed-modal > div {
       background-color: #1E293B !important;
       border-color: #334155 !important;
       color: #E2E8F0 !important;
@@ -800,10 +801,14 @@
                 <p id="reader-source-badge" class="text-xs text-slate-400 mt-0.5">Tradução Almeida Corrigida Fiel (ACF)</p>
                 <p id="reader-stats-line" class="text-[11px] font-semibold text-slate-500 mt-1"></p>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex flex-wrap items-center gap-2">
                 <button onclick="toggleBookExplanation()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold transition cursor-pointer">
                   <i data-lucide="lightbulb" class="w-4 h-4"></i>
                   <span>Explicação</span>
+                </button>
+                <button onclick="shareCurrentChapterToFeed()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-cyan-200 bg-cyan-50 hover:bg-cyan-100 text-[#0E7490] text-xs font-semibold transition cursor-pointer" title="Compartilhar leitura e reflexão no Mural da Igreja">
+                  <i data-lucide="share-2" class="w-4 h-4"></i>
+                  <span>Compartilhar no Mural da Igreja</span>
                 </button>
                 <button id="btn-complete-reading" onclick="completeChapterReading()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#10B981] hover:bg-emerald-600 text-white text-xs sm:text-sm font-semibold shadow-sm transition cursor-pointer">
                   <i data-lucide="check-circle" class="w-4 h-4"></i>
@@ -1504,6 +1509,84 @@
         </div>
         <div id="adm-members-activity-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </div>
+
+      <!-- ANALYTICS DE USO & ENGAJAMENTO (QUEM LÊ MAIS, COMPARTILHA E INTERAGE) -->
+      <div class="card p-5 sm:p-6 border-t-4 border-t-indigo-600 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-indigo-700 flex items-center gap-2">
+              <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+              Uso do Portal &amp; Rankings de Engajamento (ADM)
+            </h2>
+            <p class="text-xs text-slate-500">Acompanhe quem mais lê a Bíblia, quem mais compartilha no mural e quem mais interage por semana, mês ou total.</p>
+          </div>
+          <span id="adm-eng-today-pct" class="px-3 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">0% ativos hoje</span>
+        </div>
+
+        <!-- Period & Search Filter Bar -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center gap-2.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="adm-eng-period" onchange="onAdmEngPeriodChange()" class="px-3 py-2 text-xs font-semibold border border-slate-200 rounded-lg bg-white text-slate-700">
+              <option value="all">Todo o Período</option>
+              <option value="month">Por Mês</option>
+              <option value="week">Por Semana</option>
+            </select>
+            <input id="adm-eng-month" type="month" onchange="renderAdminPanel()" class="hidden px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-700" />
+            <input id="adm-eng-week-date" type="date" onchange="renderAdminPanel()" class="hidden px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-700" title="Escolha qualquer dia da semana desejada" />
+            <span id="adm-eng-period-label" class="text-[11px] font-semibold text-[#0E7490] px-2"></span>
+          </div>
+          <input id="adm-eng-search" type="text" oninput="renderAdminPanel()" placeholder="Pesquisar membro por nome, cargo ou ministério..."
+            class="flex-1 px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-indigo-600" />
+        </div>
+
+        <!-- Engagement KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-cyan-50/60 border border-cyan-200">
+            <span class="text-xs font-semibold text-slate-600">Total de Capítulos Lidos (Igreja)</span>
+            <div id="adm-eng-chapters" class="text-2xl font-bold text-[#0E7490] mt-1">0</div>
+          </div>
+          <div class="p-4 rounded-xl bg-indigo-50/60 border border-indigo-200">
+            <span class="text-xs font-semibold text-slate-600">Publicações no Mural</span>
+            <div id="adm-eng-posts" class="text-2xl font-bold text-indigo-700 mt-1">0</div>
+          </div>
+          <div class="p-4 rounded-xl bg-amber-50/60 border border-amber-200">
+            <span class="text-xs font-semibold text-slate-600">Interações (Améns + Comentários)</span>
+            <div id="adm-eng-interactions" class="text-2xl font-bold text-amber-700 mt-1">0</div>
+          </div>
+        </div>
+
+        <!-- 3 Rankings -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#0E7490] flex items-center gap-1.5">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Quem Lê Mais
+            </h3>
+            <div id="adm-rank-readers" class="space-y-2"></div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Quem Compartilha Mais
+            </h3>
+            <div id="adm-rank-sharers" class="space-y-2"></div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+              <i data-lucide="flame" class="w-3.5 h-3.5"></i> Quem Interage Mais
+            </h3>
+            <div id="adm-rank-interactors" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Engagement Chart -->
+        <div class="p-4 rounded-xl bg-slate-50/50 border border-slate-200">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Comparativo de Engajamento (Top 8 Membros)</h3>
+          <div class="h-64">
+            <canvas id="chart-adm-engagement"></canvas>
+          </div>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -1774,6 +1857,41 @@
 
       <div id="cargos-manage-list" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
       <p class="text-[11px] text-slate-400">A ordem acima define a hierarquia exibida no Personograma. Ao renomear um cargo, todos os membros vinculados são atualizados automaticamente.</p>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: COMPARTILHAR NO MURAL ==================== -->
+  <div id="share-feed-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h2 class="text-base font-bold text-[#0E7490] flex items-center gap-2">
+          <i data-lucide="share-2" class="w-4 h-4"></i> Compartilhar no Mural da Igreja
+        </h2>
+        <button onclick="closeShareFeedModal()" class="p-1 rounded-lg hover:bg-slate-100 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form onsubmit="submitShareFeedModal(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria</label>
+          <select id="share-feed-category" class="w-full px-3 py-2 text-xs font-semibold border border-slate-200 rounded-lg bg-white text-slate-700">
+            <option value="Testemunho">✨ Testemunho / Reflexão</option>
+            <option value="Gratidão / Louvor">🙌 Gratidão / Louvor</option>
+            <option value="Ocorrido / Aviso">📢 Ocorrido / Aviso</option>
+            <option value="Pedido de Oração">🙏 Pedido de Oração</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Sua mensagem e ideia para a igreja</label>
+          <textarea id="share-feed-text" rows="5" required placeholder="Compartilhe o que Deus falou com você nesta leitura..."
+            class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#0E7490]"></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeShareFeedModal()" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">Cancelar</button>
+          <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-[#0E7490] hover:bg-[#155E75] text-white cursor-pointer">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i> Publicar no Mural
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -4039,9 +4157,14 @@
                 <p class="text-xs text-slate-600 truncate ${isDone ? 'line-through' : ''}">${item.title}</p>
               </div>
             </div>
-            <button onclick="openBookChapter('${item.book}', ${item.ch})" class="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-cyan-50 text-slate-700 hover:text-[#0E7490] shrink-0 cursor-pointer">
-              Ler
-            </button>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="sharePlanDayToFeed(${item.day}, '${activePlan.id}')" class="p-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-[#0E7490] cursor-pointer" title="Compartilhar no Mural da Igreja">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="openBookChapter('${item.book}', ${item.ch})" class="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-cyan-50 text-slate-700 hover:text-[#0E7490] cursor-pointer">
+                Ler
+              </button>
+            </div>
           </div>
         `;
       }).join('');
@@ -4102,6 +4225,59 @@
       }
       saveState();
       showToast('Plano reiniciado! Boa nova jornada.');
+    }
+
+    function openShareFeedModal(prefillText, defaultCategory = 'Testemunho') {
+      document.getElementById('share-feed-category').value = defaultCategory;
+      document.getElementById('share-feed-text').value = prefillText || '';
+      document.getElementById('share-feed-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeShareFeedModal() {
+      document.getElementById('share-feed-modal').classList.add('hidden');
+    }
+
+    function submitShareFeedModal(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+      const text = document.getElementById('share-feed-text').value.trim();
+      const cat = document.getElementById('share-feed-category').value;
+      if (!text) return;
+
+      const list = getChurchFeed();
+      const newPost = {
+        id: 'feed_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        authorUsername: currentUser.username,
+        authorName: currentUser.name,
+        category: cat,
+        text,
+        photo: '',
+        videoUrl: '',
+        createdAt: Date.now(),
+        amens: [],
+        comments: []
+      };
+      list.unshift(newPost);
+      saveChurchFeed(list.slice(0, 60), newPost);
+      closeShareFeedModal();
+      renderChurchFeed();
+      lucide.createIcons();
+      showToast('Reflexão publicada no Mural da Igreja!');
+    }
+
+    function sharePlanDayToFeed(day, planId) {
+      const plan = getAllReadingPlans().find(p => p.id === planId);
+      const item = plan?.days.find(d => d.day === day);
+      if (!plan || !item) return;
+      const prefill = `📖 Leitura concluída no plano "${plan.name}" (Dia ${item.day}: ${item.ref}):\n\n💡 O que Deus falou comigo hoje: `;
+      openShareFeedModal(prefill, 'Testemunho');
+    }
+
+    function shareCurrentChapterToFeed() {
+      const heading = document.getElementById('reader-heading')?.textContent || 'Leitura Bíblica';
+      const prefill = `📖 Minha leitura de hoje na ACF: ${heading}\n\n💡 Reflexão / Versículo que me marcou: `;
+      openShareFeedModal(prefill, 'Testemunho');
     }
 
     // =========================================================================
@@ -4817,7 +4993,221 @@
           </div>
         </div>
       `}).join('');
+      renderAdminEngagementAnalytics(enriched);
       lucide.createIcons();
+    }
+
+    let chartAdmEngagement = null;
+
+    function onAdmEngPeriodChange() {
+      const mode = document.getElementById('adm-eng-period')?.value || 'all';
+      const monthEl = document.getElementById('adm-eng-month');
+      const weekEl = document.getElementById('adm-eng-week-date');
+      if (monthEl) {
+        if (!monthEl.value) monthEl.value = todayISO().slice(0, 7);
+        monthEl.classList.toggle('hidden', mode !== 'month');
+      }
+      if (weekEl) {
+        if (!weekEl.value) weekEl.value = todayISO();
+        weekEl.classList.toggle('hidden', mode !== 'week');
+      }
+      renderAdminPanel();
+    }
+
+    function getAdmEngDateRange() {
+      const mode = document.getElementById('adm-eng-period')?.value || 'all';
+      const labelEl = document.getElementById('adm-eng-period-label');
+      const toISO = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      if (mode === 'month') {
+        const ym = document.getElementById('adm-eng-month')?.value || todayISO().slice(0, 7);
+        const [y, m] = ym.split('-').map(Number);
+        const lastDay = new Date(y, m, 0).getDate();
+        const startISO = `${ym}-01`;
+        const endISO = `${ym}-${String(lastDay).padStart(2, '0')}`;
+        if (labelEl) labelEl.textContent = `Mês ${String(m).padStart(2, '0')}/${y}`;
+        return {
+          mode, startISO, endISO,
+          startMs: new Date(y, m - 1, 1, 0, 0, 0, 0).getTime(),
+          endMs: new Date(y, m - 1, lastDay, 23, 59, 59, 999).getTime()
+        };
+      }
+
+      if (mode === 'week') {
+        const refStr = document.getElementById('adm-eng-week-date')?.value || todayISO();
+        const [y, m, d] = refStr.split('-').map(Number);
+        const refDate = new Date(y, m - 1, d);
+        const start = new Date(refDate);
+        start.setDate(refDate.getDate() - refDate.getDay());
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        const startISO = toISO(start);
+        const endISO = toISO(end);
+        const fmt = iso => iso.split('-').slice(1).reverse().join('/');
+        if (labelEl) labelEl.textContent = `Semana ${fmt(startISO)} a ${fmt(endISO)}`;
+        return {
+          mode, startISO, endISO,
+          startMs: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).getTime(),
+          endMs: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999).getTime()
+        };
+      }
+
+      if (labelEl) labelEl.textContent = 'Histórico completo';
+      return { mode: 'all', startISO: '0000-01-01', endISO: '9999-12-31', startMs: 0, endMs: Infinity };
+    }
+
+    function renderAdminEngagementAnalytics(enriched) {
+      const range = getAdmEngDateRange();
+      const feed = getChurchFeed();
+      const rsvpMap = getChurchRsvpMap();
+      const postCounts = {};
+      const amenGivenCounts = {};
+      const commentCounts = {};
+      let totalPostsInPeriod = 0;
+      let totalInteractions = 0;
+
+      feed.forEach(p => {
+        const inRange = range.mode === 'all' || (p.createdAt >= range.startMs && p.createdAt <= range.endMs);
+        if (inRange) {
+          totalPostsInPeriod++;
+          if (p.authorUsername) postCounts[p.authorUsername] = (postCounts[p.authorUsername] || 0) + 1;
+          if (Array.isArray(p.amens)) {
+            totalInteractions += p.amens.length;
+            p.amens.forEach(u => { amenGivenCounts[u] = (amenGivenCounts[u] || 0) + 1; });
+          }
+        }
+        if (Array.isArray(p.comments)) {
+          p.comments.forEach(c => {
+            const cInRange = range.mode === 'all' || (c.createdAt >= range.startMs && c.createdAt <= range.endMs);
+            if (cInRange) {
+              totalInteractions++;
+              if (c.authorUsername) commentCounts[c.authorUsername] = (commentCounts[c.authorUsername] || 0) + 1;
+            }
+          });
+        }
+      });
+
+      const activeTodayCount = enriched.filter(u => u.stats.readToday).length;
+      const activePct = enriched.length > 0 ? Math.round((activeTodayCount / enriched.length) * 100) : 0;
+
+      const withScores = enriched.map(u => {
+        let uState = defaultState();
+        try {
+          const raw = localStorage.getItem(getUserStorageKey(u.username));
+          if (raw) uState = { ...defaultState(), ...JSON.parse(raw) };
+        } catch {}
+
+        const readDaysPeriod = range.mode === 'all'
+          ? uState.readDays.length
+          : uState.readDays.filter(d => d >= range.startISO && d <= range.endISO).length;
+        const prayersPeriod = range.mode === 'all'
+          ? uState.prayers.length
+          : uState.prayers.filter(p => p.date >= range.startISO && p.date <= range.endISO).length;
+        const rsvpPeriod = Object.entries(rsvpMap).filter(([k, arr]) => {
+          const iso = k.split('::')[0];
+          const inRange = range.mode === 'all' || (iso >= range.startISO && iso <= range.endISO);
+          return inRange && Array.isArray(arr) && arr.some(x => x.username === u.username);
+        }).length;
+
+        const posts = postCounts[u.username] || 0;
+        const amens = amenGivenCounts[u.username] || 0;
+        const comments = commentCounts[u.username] || 0;
+        const interactionScore = amens + comments + rsvpPeriod + prayersPeriod;
+        return { ...u, readDaysPeriod, posts, amens, comments, rsvpPeriod, prayersPeriod, interactionScore };
+      });
+
+      const q = (document.getElementById('adm-eng-search')?.value || '').trim().toLowerCase();
+      const filteredScores = q
+        ? withScores.filter(u => `${u.name} ${u.username} ${u.cargo} ${u.ministry || ''}`.toLowerCase().includes(q))
+        : withScores;
+
+      const totalChapters = filteredScores.reduce((s, u) => s + u.stats.chapters, 0);
+      const elChap = document.getElementById('adm-eng-chapters');
+      const elPosts = document.getElementById('adm-eng-posts');
+      const elInter = document.getElementById('adm-eng-interactions');
+      const elPct = document.getElementById('adm-eng-today-pct');
+      if (elChap) elChap.textContent = totalChapters;
+      if (elPosts) elPosts.textContent = totalPostsInPeriod;
+      if (elInter) elInter.textContent = totalInteractions;
+      if (elPct) elPct.textContent = `${activePct}% ativos hoje (${activeTodayCount}/${enriched.length})`;
+
+      const renderRankList = (elId, sorted, metricFn, emptyMsg) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const top = q ? sorted : sorted.slice(0, 5);
+        if (top.length === 0) {
+          el.innerHTML = `<p class="text-xs text-slate-400 italic">${emptyMsg}</p>`;
+          return;
+        }
+        const medals = ['🥇', '🥈', '🥉'];
+        el.innerHTML = top.map((u, idx) => {
+          const initials = u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+          const avatar = u.photo
+            ? `<img src="${u.photo}" class="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0" />`
+            : `<div class="w-7 h-7 rounded-full bg-[#0E7490] text-white text-[10px] font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+          return `
+            <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-white border border-slate-200">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-xs font-bold w-5 text-center shrink-0">${medals[idx] || (idx + 1) + 'º'}</span>
+                ${avatar}
+                <span class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(u.name)}</span>
+              </div>
+              <span class="text-[11px] font-bold text-[#0E7490] shrink-0">${metricFn(u)}</span>
+            </div>
+          `;
+        }).join('');
+      };
+
+      renderRankList(
+        'adm-rank-readers',
+        [...filteredScores].sort((a, b) => (b.readDaysPeriod - a.readDaysPeriod) || (b.stats.chapters - a.stats.chapters)),
+        u => range.mode === 'all' ? `${u.stats.chapters} cap • ${u.readDaysPeriod}d` : `${u.readDaysPeriod}d lidos`,
+        'Nenhum membro encontrado.'
+      );
+      renderRankList(
+        'adm-rank-sharers',
+        [...filteredScores].sort((a, b) => b.posts - a.posts),
+        u => `${u.posts} ${u.posts === 1 ? 'post' : 'posts'}`,
+        'Nenhum membro encontrado.'
+      );
+      renderRankList(
+        'adm-rank-interactors',
+        [...filteredScores].sort((a, b) => b.interactionScore - a.interactionScore),
+        u => `${u.interactionScore} pts`,
+        'Nenhum membro encontrado.'
+      );
+
+      const canvas = document.getElementById('chart-adm-engagement');
+      if (canvas && window.Chart) {
+        const top8 = [...filteredScores]
+          .sort((a, b) => (b.readDaysPeriod + b.interactionScore + b.posts) - (a.readDaysPeriod + a.interactionScore + a.posts))
+          .slice(0, 8);
+        const isDark = document.body.classList.contains('dark');
+        const tickColor = isDark ? '#94A3B8' : '#475569';
+        const gridColor = isDark ? 'rgba(148,163,184,0.12)' : 'rgba(15,23,42,0.06)';
+
+        if (chartAdmEngagement) chartAdmEngagement.destroy();
+        chartAdmEngagement = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: top8.map(u => u.name.split(' ').slice(0, 2).join(' ')),
+            datasets: [
+              { label: range.mode === 'all' ? 'Capítulos Lidos' : 'Dias Lidos no Período', data: top8.map(u => range.mode === 'all' ? u.stats.chapters : u.readDaysPeriod), backgroundColor: '#0E7490', borderRadius: 6 },
+              { label: 'Publicações Mural', data: top8.map(u => u.posts), backgroundColor: '#4F46E5', borderRadius: 6 },
+              { label: 'Interações (Améns/Coment./Presenças)', data: top8.map(u => u.interactionScore), backgroundColor: '#F59E0B', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: tickColor, font: { size: 11 } } } },
+            scales: {
+              x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { display: false } },
+              y: { beginAtZero: true, ticks: { color: tickColor, precision: 0 }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
     }
 
     let editMemberPhotoDataUrl = '';
