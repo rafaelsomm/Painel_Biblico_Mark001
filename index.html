@@ -574,7 +574,13 @@
             </h3>
             <p class="text-xs text-slate-500">Todos os membros podem publicar acontecimentos, avisos, testemunhos e pedidos.</p>
           </div>
-          <span id="overview-feed-count" class="text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-[#0E7490]">0 publicações</span>
+          <div class="flex items-center gap-2">
+            <span id="overview-feed-count" class="text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-[#0E7490]">0 publicações</span>
+            <button onclick="pullCloudDataNow(false, true)" class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full border border-slate-200 hover:bg-slate-100 text-slate-600 cursor-pointer" title="Buscar atualizações do mural e da igreja">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              <span>Atualizar</span>
+            </button>
+          </div>
         </div>
 
         <!-- New Post Form -->
@@ -2419,7 +2425,13 @@
     const CLOUD_SHARED_COL = 'painel_biblico_acf';
     const CLOUD_USERS_DATA_COL = 'painel_biblico_acf_user_data';
     const CLOUD_FEED_COL = 'painel_biblico_acf_feed';
+    const FEED_PAGE_SIZE = 25;
+    const ADMIN_USERS_LIMIT = 100;
+    const ADMIN_SYNC_TTL_MS = 5 * 60 * 1000;
     let cloudFeedCache = null;
+    let feedLastVisibleDoc = null;
+    let feedHasMore = false;
+    let lastAdminUserSyncAt = 0;
 
     function setCloudStatusUI(online, label) {
       cloudConnected = online;
@@ -2482,37 +2494,138 @@
       return false;
     }
 
-    async function pullCloudDataNow(silent = false) {
-      if (!cloudDb) {
-        if (!silent) showToast('Firebase não está conectado.');
-        return;
+    async function cloudGetDocCacheFirst(docRef, forceServer = false) {
+      if (!forceServer) {
+        try {
+          const cached = await docRef.get({ source: 'cache' });
+          if (cached && cached.exists) return cached;
+        } catch {}
       }
+      return await docRef.get({ source: 'server' });
+    }
+
+    async function cloudGetQueryCacheFirst(queryRef, forceServer = false) {
+      if (!forceServer) {
+        try {
+          const cached = await queryRef.get({ source: 'cache' });
+          if (cached && !cached.empty) return cached;
+        } catch {}
+      }
+      return await queryRef.get({ source: 'server' });
+    }
+
+    async function pullUserDataSingle(username, forceServer = false) {
+      if (!cloudDb || !username) return;
       try {
-        const [sharedSnap, userDataSnap, feedSnap] = await Promise.all([
-          cloudDb.collection(CLOUD_SHARED_COL).get(),
-          cloudDb.collection(CLOUD_USERS_DATA_COL).get(),
-          cloudDb.collection(CLOUD_FEED_COL).get()
-        ]);
-        sharedSnap.forEach(doc => {
+        const doc = await cloudGetDocCacheFirst(cloudDb.collection(CLOUD_USERS_DATA_COL).doc(username), forceServer);
+        if (doc && doc.exists) {
           const d = doc.data();
-          if (d && d.data) applyCloudSharedDoc(doc.id, d.data);
-        });
-        userDataSnap.forEach(doc => {
+          if (d && d.data && localStorage.getItem(getUserStorageKey(username)) !== d.data) {
+            localStorage.setItem(getUserStorageKey(username), d.data);
+          }
+        }
+      } catch (e) {
+        console.warn('Erro ao buscar dados do usuário:', e);
+      }
+    }
+
+    async function syncAllUsersDataForAdmin(forceServer = false) {
+      if (!cloudDb || !isAdmin()) return;
+      const now = Date.now();
+      if (!forceServer && now - lastAdminUserSyncAt < ADMIN_SYNC_TTL_MS) return;
+      try {
+        const snap = await cloudGetQueryCacheFirst(
+          cloudDb.collection(CLOUD_USERS_DATA_COL).limit(ADMIN_USERS_LIMIT),
+          forceServer
+        );
+        snap.forEach(doc => {
           const d = doc.data();
           if (d && d.data) {
             localStorage.setItem(getUserStorageKey(doc.id), d.data);
           }
         });
+        lastAdminUserSyncAt = Date.now();
+        if (!document.getElementById('tab-admin').classList.contains('hidden')) renderAdminPanel();
+        if (!document.getElementById('tab-members').classList.contains('hidden')) renderMembersDirectory();
+      } catch (e) {
+        console.warn('Erro ao sincronizar estatísticas dos membros (ADM):', e);
+      }
+    }
+
+    async function loadMoreFeedPosts() {
+      if (!cloudDb || !feedLastVisibleDoc) return;
+      try {
+        const snap = await cloudDb.collection(CLOUD_FEED_COL)
+          .orderBy('createdAt', 'desc')
+          .startAfter(feedLastVisibleDoc)
+          .limit(FEED_PAGE_SIZE)
+          .get();
+        const extra = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (d && d.id) extra.push(d);
+        });
+        feedLastVisibleDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+        feedHasMore = snap.docs.length === FEED_PAGE_SIZE;
+        if (extra.length > 0) {
+          const current = getChurchFeed();
+          const existingIds = new Set(current.map(p => p.id));
+          const merged = [...current, ...extra.filter(p => !existingIds.has(p.id))];
+          cloudFeedCache = merged;
+          try { localStorage.setItem(CHURCH_FEED_KEY, JSON.stringify(merged)); } catch {}
+          renderChurchFeed();
+          lucide.createIcons();
+        } else {
+          feedHasMore = false;
+          renderChurchFeed();
+        }
+      } catch (e) {
+        console.warn('Erro ao carregar mais publicações:', e);
+        showToast('Não foi possível carregar mais publicações.');
+      }
+    }
+
+    async function pullCloudDataNow(silent = false, forceServer = false) {
+      if (!cloudDb) {
+        if (!silent) showToast('Firebase não está conectado.');
+        return;
+      }
+      try {
+        const activeUsername = (currentUser && currentUser.username) || localStorage.getItem(SESSION_KEY);
+        const feedQuery = cloudDb.collection(CLOUD_FEED_COL)
+          .orderBy('createdAt', 'desc')
+          .limit(FEED_PAGE_SIZE);
+
+        const [sharedSnap, feedSnap] = await Promise.all([
+          cloudGetQueryCacheFirst(cloudDb.collection(CLOUD_SHARED_COL), forceServer),
+          cloudGetQueryCacheFirst(feedQuery, forceServer)
+        ]);
+
+        sharedSnap.forEach(doc => {
+          const d = doc.data();
+          if (d && d.data) applyCloudSharedDoc(doc.id, d.data);
+        });
+
+        if (activeUsername) {
+          await pullUserDataSingle(activeUsername, forceServer);
+        }
+        if (forceServer && isAdmin()) {
+          await syncAllUsersDataForAdmin(true);
+        }
+
         const feedPosts = [];
         feedSnap.forEach(doc => {
           const d = doc.data();
           if (d && d.id) feedPosts.push(d);
         });
+        feedLastVisibleDoc = feedSnap.docs.length > 0 ? feedSnap.docs[feedSnap.docs.length - 1] : null;
+        feedHasMore = feedSnap.docs.length === FEED_PAGE_SIZE;
         if (feedPosts.length > 0) {
           feedPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
           cloudFeedCache = feedPosts;
           try { localStorage.setItem(CHURCH_FEED_KEY, JSON.stringify(feedPosts)); } catch {}
         }
+
         if (currentUser) {
           state = loadState();
           refreshAllUI();
@@ -2568,53 +2681,12 @@
         }
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         cloudDb = firebase.firestore();
-        await pullCloudDataNow(true);
-
-        // Real-time listeners for shared church/user data
-        cloudDb.collection(CLOUD_SHARED_COL).onSnapshot(snap => {
-          let changed = false;
-          snap.docChanges().forEach(change => {
-            if (change.type === 'added' || change.type === 'modified') {
-              const d = change.doc.data();
-              if (d && d.data && applyCloudSharedDoc(change.doc.id, d.data)) {
-                changed = true;
-              }
-            }
-          });
-          if (changed && currentUser) refreshAllUI();
-        });
-
-        cloudDb.collection(CLOUD_USERS_DATA_COL).onSnapshot(snap => {
-          let changed = false;
-          snap.docChanges().forEach(change => {
-            if (change.type === 'added' || change.type === 'modified') {
-              const d = change.doc.data();
-              const uname = change.doc.id;
-              if (d && d.data && localStorage.getItem(getUserStorageKey(uname)) !== d.data) {
-                localStorage.setItem(getUserStorageKey(uname), d.data);
-                if (currentUser && currentUser.username === uname) {
-                  state = loadState();
-                }
-                changed = true;
-              }
-            }
-          });
-          if (changed && currentUser) refreshAllUI();
-        });
-
-        cloudDb.collection(CLOUD_FEED_COL).onSnapshot(snap => {
-          const posts = [];
-          snap.forEach(doc => {
-            const d = doc.data();
-            if (d && d.id) posts.push(d);
-          });
-          if (posts.length > 0 || (cloudFeedCache && cloudFeedCache.length > 0)) {
-            posts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            cloudFeedCache = posts;
-            try { localStorage.setItem(CHURCH_FEED_KEY, JSON.stringify(posts)); } catch {}
-            if (currentUser) renderChurchFeed();
-          }
-        });
+        try {
+          await cloudDb.enablePersistence({ synchronizeTabs: true });
+        } catch (err) {
+          console.warn('Persistência offline não habilitada:', err.code || err.message);
+        }
+        await pullCloudDataNow(true, false);
       } catch (e) {
         console.warn('Falha ao inicializar Firebase:', e);
         setCloudStatusUI(false, 'Modo local');
@@ -2831,6 +2903,12 @@
       document.getElementById('nav-tab-admin').classList.toggle('hidden', !isAdmin());
       refreshAllUI();
       maybeShowWelcomeTour();
+      pullUserDataSingle(user.username, false).then(() => {
+        if (currentUser && currentUser.username === user.username) {
+          state = loadState();
+          refreshAllUI();
+        }
+      });
     }
 
     function logoutUser() {
@@ -2919,8 +2997,14 @@
       if (tabId === 'overview') renderCharts();
       if (tabId === 'agenda') renderCalendar();
       if (tabId === 'events') renderEventsPanel();
-      if (tabId === 'members' && isAdmin()) renderMembersDirectory();
-      if (tabId === 'admin' && isAdmin()) renderAdminPanel();
+      if (tabId === 'members' && isAdmin()) {
+        renderMembersDirectory();
+        syncAllUsersDataForAdmin(false);
+      }
+      if (tabId === 'admin' && isAdmin()) {
+        renderAdminPanel();
+        syncAllUsersDataForAdmin(false);
+      }
       lucide.createIcons();
     }
 
@@ -6265,7 +6349,13 @@
             </div>
           </article>
         `;
-      }).join('');
+      }).join('') + (feedHasMore ? `
+        <div class="text-center pt-2">
+          <button onclick="loadMoreFeedPosts()" class="px-4 py-2 text-xs font-semibold rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer">
+            Carregar publicações mais antigas
+          </button>
+        </div>
+      ` : '');
     }
 
     function openFeedImageModal(postId) {
