@@ -1642,6 +1642,29 @@
             <canvas id="chart-adm-age-groups"></canvas>
           </div>
         </div>
+
+        <!-- Exact Age Breakdown & Custom Age Filter -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div class="p-4 rounded-xl bg-slate-50/50 border border-slate-200 lg:col-span-6 space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#0E7490]">Pessoas por Idade Exata (Clique para filtrar)</h3>
+            <div id="adm-exact-ages-list" class="flex flex-wrap gap-2 max-h-44 overflow-y-auto"></div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50/50 border border-slate-200 lg:col-span-6 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-700">Consultar Quantas Pessoas Têm X Idade</h3>
+              <span id="adm-age-filter-count" class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">0 pessoas</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-slate-600 font-semibold">Idade de</label>
+              <input id="adm-age-min" type="number" min="0" max="120" oninput="renderAdminAgeFilter()" placeholder="Ex: 18" class="w-20 px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg bg-white" />
+              <label class="text-xs text-slate-600 font-semibold">até</label>
+              <input id="adm-age-max" type="number" min="0" max="120" oninput="renderAdminAgeFilter()" placeholder="Ex: 25" class="w-20 px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg bg-white" />
+              <button type="button" onclick="clearAdminAgeFilter()" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 cursor-pointer">Limpar</button>
+            </div>
+            <div id="adm-age-filter-results" class="space-y-1.5 max-h-32 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
       </div>
 
       <!-- DASHBOARD DE MOVIMENTAÇÃO, RETENÇÃO & INATIVIDADE -->
@@ -5278,6 +5301,9 @@
 
       let ageSum = 0;
       let ageKnownCount = 0;
+      const exactAgeMap = {};
+      const activeWithAge = [];
+
       activeMembers.forEach(u => {
         const age = getMemberAgeYears(u.birthDate);
         if (age === null) {
@@ -5285,10 +5311,36 @@
         } else {
           ageSum += age;
           ageKnownCount++;
+          exactAgeMap[age] = exactAgeMap[age] || [];
+          exactAgeMap[age].push(u);
+          activeWithAge.push({ ...u, age });
           const g = groups.find(x => x.min >= 0 && age >= x.min && age <= x.max);
           if (g) g.count++;
         }
       });
+
+      window._admActiveWithAge = activeWithAge;
+
+      const exactEl = document.getElementById('adm-exact-ages-list');
+      if (exactEl) {
+        const sortedAges = Object.keys(exactAgeMap).map(Number).sort((a, b) => a - b);
+        if (sortedAges.length === 0) {
+          exactEl.innerHTML = '<p class="text-xs text-slate-400 italic">Cadastre a data de nascimento dos membros para ver as idades.</p>';
+        } else {
+          exactEl.innerHTML = sortedAges.map(age => {
+            const list = exactAgeMap[age];
+            const names = list.map(u => u.name).join(', ');
+            return `
+              <button type="button" onclick="selectExactAgeFilter(${age})" title="${escapeHtml(names)}"
+                class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-cyan-50 border border-slate-200 hover:border-[#0E7490] text-xs transition cursor-pointer flex items-center gap-1.5">
+                <span class="font-bold text-[#0E7490]">${age} anos:</span>
+                <span class="font-semibold text-slate-700">${list.length} ${list.length === 1 ? 'pessoa' : 'pessoas'}</span>
+              </button>
+            `;
+          }).join('');
+        }
+      }
+      renderAdminAgeFilter();
 
       const totalActive = activeMembers.length;
       const totalInactive = enriched.length - totalActive;
@@ -5340,6 +5392,52 @@
           }
         });
       }
+    }
+
+    function selectExactAgeFilter(age) {
+      const minEl = document.getElementById('adm-age-min');
+      const maxEl = document.getElementById('adm-age-max');
+      if (minEl) minEl.value = age;
+      if (maxEl) maxEl.value = age;
+      renderAdminAgeFilter();
+    }
+
+    function clearAdminAgeFilter() {
+      const minEl = document.getElementById('adm-age-min');
+      const maxEl = document.getElementById('adm-age-max');
+      if (minEl) minEl.value = '';
+      if (maxEl) maxEl.value = '';
+      renderAdminAgeFilter();
+    }
+
+    function renderAdminAgeFilter() {
+      const list = window._admActiveWithAge || [];
+      const minRaw = document.getElementById('adm-age-min')?.value;
+      const maxRaw = document.getElementById('adm-age-max')?.value;
+      const countEl = document.getElementById('adm-age-filter-count');
+      const resEl = document.getElementById('adm-age-filter-results');
+      if (!resEl) return;
+
+      const minAge = minRaw !== '' && minRaw !== undefined ? parseInt(minRaw, 10) : null;
+      const maxAge = maxRaw !== '' && maxRaw !== undefined ? parseInt(maxRaw, 10) : (minAge !== null && maxRaw === '' ? minAge : null);
+
+      const filtered = list.filter(u => {
+        if (minAge !== null && u.age < minAge) return false;
+        if (maxAge !== null && u.age > maxAge) return false;
+        return true;
+      }).sort((a, b) => a.age - b.age);
+
+      if (countEl) countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'pessoa' : 'pessoas'}`;
+      if (filtered.length === 0) {
+        resEl.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhuma pessoa encontrada com essa idade.</p>';
+        return;
+      }
+      resEl.innerHTML = filtered.map(u => `
+        <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs">
+          <span class="font-semibold text-slate-800 truncate">${escapeHtml(u.name)} <span class="text-[10px] text-slate-400 font-normal">• ${escapeHtml(u.cargo)}</span></span>
+          <span class="font-bold text-indigo-700 shrink-0">${u.age} anos</span>
+        </div>
+      `).join('');
     }
 
     let chartAdmRetention = null;
