@@ -1389,6 +1389,27 @@
               <input id="adm-mem-born" type="checkbox" onchange="syncBornInChurch('adm-mem-born', 'adm-mem-birthdate', 'adm-mem-joined')" class="w-4 h-4 accent-emerald-600 rounded" />
               <span>🌱 Nascido(a) na Igreja (desde o nascimento)</span>
             </label>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Data do Batismo</label>
+                <input id="adm-mem-baptism-date" type="date"
+                  class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Local do Batismo</label>
+                <input id="adm-mem-baptism-place" type="text" placeholder="Ex: Igreja Sede, Sítio..."
+                  class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-600" />
+              </div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold text-slate-700">🕊️ Unções / Consagrações (até 5)</span>
+                <button type="button" onclick="addAnointingRow('adm')" class="px-2 py-1 text-[11px] font-semibold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 cursor-pointer">
+                  + Adicionar Unção
+                </button>
+              </div>
+              <div id="adm-anointings-list" class="space-y-2"></div>
+            </div>
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Cargo na Igreja</label>
               <select id="adm-mem-cargo" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white">
@@ -1642,6 +1663,27 @@
           <input id="edit-mem-born" type="checkbox" onchange="syncBornInChurch('edit-mem-born', 'edit-mem-birthdate', 'edit-mem-joined')" class="w-4 h-4 accent-emerald-600 rounded" />
           <span>🌱 Nascido(a) na Igreja (desde o nascimento)</span>
         </label>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data do Batismo</label>
+            <input id="edit-mem-baptism-date" type="date" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Local do Batismo</label>
+            <input id="edit-mem-baptism-place" type="text" placeholder="Ex: Igreja Sede, Sítio..." class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" />
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold text-slate-700">🕊️ Unções / Consagrações (até 5)</span>
+            <button type="button" onclick="addAnointingRow('edit')" class="px-2 py-1 text-[11px] font-semibold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 cursor-pointer">
+              + Adicionar Unção
+            </button>
+          </div>
+          <div id="edit-anointings-list" class="space-y-2"></div>
+        </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -4419,6 +4461,61 @@
     // 10.5. PAINEL ADM: CADASTRO DE MEMBROS, ATIVIDADES & PERSONOGRAMA
     // =========================================================================
     let pendingMemberPhotoDataUrl = '';
+    const anointingDrafts = { adm: [], edit: [] };
+
+    function renderAnointingsInputs(prefix) {
+      const container = document.getElementById(`${prefix}-anointings-list`);
+      if (!container) return;
+      const list = anointingDrafts[prefix] || [];
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-[11px] text-slate-400 italic">Nenhuma unção registrada.</p>';
+        return;
+      }
+      container.innerHTML = list.map((item, idx) => `
+        <div class="p-2 rounded-lg bg-white border border-slate-200 space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-bold uppercase text-indigo-600">Unção ${idx + 1}</span>
+            <button type="button" onclick="removeAnointingRow('${prefix}', ${idx})" class="text-[11px] text-rose-600 hover:underline cursor-pointer">Remover</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+            <input type="text" value="${escapeHtml(item.title || '')}" oninput="updateAnointingField('${prefix}', ${idx}, 'title', this.value)" placeholder="Ex: Diácono, Presbítero..."
+              class="sm:col-span-2 px-2 py-1 text-xs border border-slate-200 rounded-md" />
+            <input type="date" value="${escapeHtml(item.date || '')}" oninput="updateAnointingField('${prefix}', ${idx}, 'date', this.value)"
+              class="px-2 py-1 text-xs border border-slate-200 rounded-md" />
+          </div>
+          <input type="text" value="${escapeHtml(item.place || '')}" oninput="updateAnointingField('${prefix}', ${idx}, 'place', this.value)" placeholder="Local / Observação (opcional)"
+            class="w-full px-2 py-1 text-xs border border-slate-200 rounded-md" />
+        </div>
+      `).join('');
+    }
+
+    function addAnointingRow(prefix) {
+      anointingDrafts[prefix] = anointingDrafts[prefix] || [];
+      if (anointingDrafts[prefix].length >= 5) {
+        showToast('Limite máximo de 5 unções por membro.');
+        return;
+      }
+      anointingDrafts[prefix].push({ title: '', date: '', place: '' });
+      renderAnointingsInputs(prefix);
+    }
+
+    function removeAnointingRow(prefix, idx) {
+      anointingDrafts[prefix].splice(idx, 1);
+      renderAnointingsInputs(prefix);
+    }
+
+    function updateAnointingField(prefix, idx, field, val) {
+      if (anointingDrafts[prefix] && anointingDrafts[prefix][idx]) {
+        anointingDrafts[prefix][idx][field] = val;
+      }
+    }
+
+    function getCleanAnointings(prefix) {
+      return (anointingDrafts[prefix] || [])
+        .map(a => ({ title: (a.title || '').trim(), date: a.date || '', place: (a.place || '').trim() }))
+        .filter(a => a.title || a.date || a.place)
+        .slice(0, 5);
+    }
 
     function previewMemberPhoto(e) {
       const file = e.target.files[0];
@@ -4462,6 +4559,9 @@
       const birthDate = document.getElementById('adm-mem-birthdate').value;
       const bornInChurch = document.getElementById('adm-mem-born').checked;
       const joinedDate = (bornInChurch && birthDate) ? birthDate : (document.getElementById('adm-mem-joined').value || todayISO());
+      const baptismDate = document.getElementById('adm-mem-baptism-date').value;
+      const baptismPlace = document.getElementById('adm-mem-baptism-place').value.trim();
+      const anointings = getCleanAnointings('adm');
       const cargo = document.getElementById('adm-mem-cargo').value;
       const role = document.getElementById('adm-mem-role').value || 'user';
       const ministry = document.getElementById('adm-mem-ministry').value.trim();
@@ -4480,12 +4580,15 @@
       const passHash = await hashPassword(username, pass);
       users[username] = {
         username, name, matricula: autoMat, birthDate, joinedDate, bornInChurch,
+        baptismDate, baptismPlace, anointings,
         photo: pendingMemberPhotoDataUrl || '',
         role, cargo, ministry, phone, passHash, createdAt: todayISO()
       };
       saveUsersMap(users);
       e.target.reset();
       pendingMemberPhotoDataUrl = '';
+      anointingDrafts.adm = [];
+      renderAnointingsInputs('adm');
       document.getElementById('adm-mem-photo-preview').innerHTML = '<i data-lucide="camera" class="w-5 h-5"></i>';
       document.getElementById('adm-mem-pass').value = '1234';
       renderAdminPanel();
@@ -4533,6 +4636,7 @@
     function renderAdminPanel() {
       if (!isAdmin()) return;
       syncCargoSelects();
+      renderAnointingsInputs('adm');
       const cargos = getChurchCargos();
       const users = Object.values(getUsersMap());
       const rsvpMap = getChurchRsvpMap();
@@ -4675,6 +4779,10 @@
       document.getElementById('edit-mem-birthdate').value = u.birthDate || '';
       document.getElementById('edit-mem-joined').value = u.joinedDate || u.createdAt || '';
       document.getElementById('edit-mem-born').checked = !!u.bornInChurch;
+      document.getElementById('edit-mem-baptism-date').value = u.baptismDate || '';
+      document.getElementById('edit-mem-baptism-place').value = u.baptismPlace || '';
+      anointingDrafts.edit = Array.isArray(u.anointings) ? u.anointings.map(a => ({ ...a })).slice(0, 5) : [];
+      renderAnointingsInputs('edit');
       document.getElementById('edit-mem-cargo').value = u.cargo || (u.username === 'adm' ? 'Pastor Presidente' : 'Membro');
       document.getElementById('edit-mem-ministry').value = u.ministry || '';
       document.getElementById('edit-mem-phone').value = u.phone || '';
@@ -4755,6 +4863,9 @@
       u.birthDate = document.getElementById('edit-mem-birthdate').value;
       u.bornInChurch = document.getElementById('edit-mem-born').checked;
       u.joinedDate = (u.bornInChurch && u.birthDate) ? u.birthDate : document.getElementById('edit-mem-joined').value;
+      u.baptismDate = document.getElementById('edit-mem-baptism-date').value;
+      u.baptismPlace = document.getElementById('edit-mem-baptism-place').value.trim();
+      u.anointings = getCleanAnointings('edit');
       u.cargo = document.getElementById('edit-mem-cargo').value;
       u.ministry = document.getElementById('edit-mem-ministry').value.trim();
       u.phone = document.getElementById('edit-mem-phone').value.trim();
@@ -5778,6 +5889,19 @@
                   <span class="text-[11px] text-slate-500">Tempo de Casa:</span>
                   <span class="text-xs font-bold text-[#0E7490]">⏳ ${u.tenure.label}</span>
                 </div>
+                ${(u.baptismDate || u.baptismPlace) ? `
+                  <div class="col-span-2 pt-1 border-t border-slate-200/70 text-[11px] text-slate-600">
+                    💧 <span class="font-semibold">Batismo:</span> ${fmtBr(u.baptismDate)}${u.baptismPlace ? ' • ' + escapeHtml(u.baptismPlace) : ''}
+                  </div>
+                ` : ''}
+                ${(Array.isArray(u.anointings) && u.anointings.length > 0) ? `
+                  <div class="col-span-2 pt-1 border-t border-slate-200/70 space-y-1">
+                    <span class="text-[10px] font-bold uppercase text-indigo-600 block">🕊️ Unções (${u.anointings.length})</span>
+                    <div class="flex flex-wrap gap-1">
+                      ${u.anointings.map(a => `<span class="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-indigo-50 text-indigo-800 border border-indigo-200" title="${escapeHtml(a.place || '')}">${escapeHtml(a.title || 'Unção')}${a.date ? ' (' + fmtBr(a.date) + ')' : ''}</span>`).join('')}
+                    </div>
+                  </div>
+                ` : ''}
               </div>
 
               <div class="grid grid-cols-4 gap-1.5 text-center text-[11px]">
