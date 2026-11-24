@@ -1227,7 +1227,31 @@
               </h2>
               <p class="text-xs text-slate-500">Irmãos celebrando tempo de caminhada neste mês.</p>
             </div>
-            <div id="events-anniversaries-list" class="space-y-2.5 max-h-72 overflow-y-auto pr-1"></div>
+            <div id="events-anniversaries-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- Baptism Anniversaries -->
+          <div class="card p-5 sm:p-6 border-t-4 border-t-cyan-500 space-y-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="droplets" class="w-4 h-4 text-[#0E7490]"></i>
+                Aniversários de Batismo
+              </h2>
+              <p class="text-xs text-slate-500">Comemorações de batismo nos próximos 45 dias.</p>
+            </div>
+            <div id="events-baptisms-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- Anointing Anniversaries -->
+          <div class="card p-5 sm:p-6 border-t-4 border-t-indigo-500 space-y-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+                Aniversários de Unção / Consagração
+              </h2>
+              <p class="text-xs text-slate-500">Marcos de consagração e unção nos próximos 45 dias.</p>
+            </div>
+            <div id="events-anointings-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
           </div>
         </div>
       </div>
@@ -5277,25 +5301,42 @@
         }
       }
 
-      // 2. Collect upcoming birthdays (next 45 days)
+      // 2. Helper for upcoming anniversary dates (next 45 days)
+      const calcUpcoming = dateStr => {
+        if (!dateStr) return null;
+        const parts = dateStr.split('-').map(Number);
+        if (parts.length < 3 || !parts[1] || !parts[2]) return null;
+        const [yr, mo, dy] = parts;
+        let nextDate = new Date(now.getFullYear(), mo - 1, dy);
+        if (nextDate < baseToday) nextDate = new Date(now.getFullYear() + 1, mo - 1, dy);
+        const diffDays = Math.round((nextDate - baseToday) / 86400000);
+        if (diffDays > 45) return null;
+        const years = yr > 1900 ? nextDate.getFullYear() - yr : null;
+        return { day: dy, month: mo, diffDays, years };
+      };
+
       const users = Object.values(getUsersMap());
       const upcomingBdays = [];
+      const upcomingBaptisms = [];
+      const upcomingAnointings = [];
+
       users.forEach(u => {
-        if (!u.birthDate) return;
-        const parts = u.birthDate.split('-').map(Number);
-        if (parts.length < 3) return;
-        const [bYear, bMonth, bDay] = parts;
-        let nextBday = new Date(now.getFullYear(), bMonth - 1, bDay);
-        if (nextBday < baseToday) {
-          nextBday = new Date(now.getFullYear() + 1, bMonth - 1, bDay);
-        }
-        const diffDays = Math.round((nextBday - baseToday) / 86400000);
-        if (diffDays <= 45) {
-          const turningAge = bYear > 1900 ? nextBday.getFullYear() - bYear : null;
-          upcomingBdays.push({ ...u, bDay, bMonth, diffDays, turningAge });
+        const b = calcUpcoming(u.birthDate);
+        if (b) upcomingBdays.push({ ...u, bDay: b.day, bMonth: b.month, diffDays: b.diffDays, turningAge: b.years });
+
+        const bp = calcUpcoming(u.baptismDate);
+        if (bp) upcomingBaptisms.push({ ...u, ...bp });
+
+        if (Array.isArray(u.anointings)) {
+          u.anointings.forEach(a => {
+            const an = calcUpcoming(a.date);
+            if (an) upcomingAnointings.push({ ...u, ...an, anointTitle: a.title || 'Unção', anointPlace: a.place || '' });
+          });
         }
       });
       upcomingBdays.sort((a, b) => a.diffDays - b.diffDays);
+      upcomingBaptisms.sort((a, b) => a.diffDays - b.diffDays);
+      upcomingAnointings.sort((a, b) => a.diffDays - b.diffDays);
 
       const bdays30Count = upcomingBdays.filter(b => b.diffDays <= 30).length;
       const bdayKpi = document.getElementById('ev-kpi-bdays');
@@ -5424,6 +5465,65 @@
                 <div class="flex flex-col items-end gap-1 shrink-0">
                   ${u.tenure.isAnnivMonth ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-cyan-100 text-[#0E7490]">Aniv. Igreja 🎉</span>' : ''}
                   ${u.bornInChurch ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800">🌱 Nascido na Igreja</span>' : ''}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+      // Render Baptism Anniversaries List
+      const baptListEl = document.getElementById('events-baptisms-list');
+      if (baptListEl) {
+        if (upcomingBaptisms.length === 0) {
+          baptListEl.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum aniversário de batismo nos próximos 45 dias.</p>';
+        } else {
+          baptListEl.innerHTML = upcomingBaptisms.map(u => {
+            const initials = u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+            const avatar = u.photo
+              ? `<img src="${u.photo}" class="w-9 h-9 rounded-full object-cover border border-cyan-200 shrink-0" />`
+              : `<div class="w-9 h-9 rounded-full bg-[#0E7490] text-white text-xs font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+            const isToday = u.diffDays === 0;
+            return `
+              <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl border ${isToday ? 'bg-cyan-50 border-cyan-300' : 'bg-slate-50 border-slate-200'}">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  ${avatar}
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(u.name)}</p>
+                    <p class="text-[11px] text-slate-500">💧 ${String(u.day).padStart(2, '0')}/${String(u.month).padStart(2, '0')}${u.years ? ` (${u.years} ${u.years === 1 ? 'ano' : 'anos'})` : ''}${u.baptismPlace ? ' • ' + escapeHtml(u.baptismPlace) : ''}</p>
+                  </div>
+                </div>
+                <div class="shrink-0">
+                  ${isToday ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#0E7490] text-white">Hoje! 💧</span>' : formatCountdownPill(u.diffDays)}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Render Anointing Anniversaries List
+      const anointListEl = document.getElementById('events-anointings-list');
+      if (anointListEl) {
+        if (upcomingAnointings.length === 0) {
+          anointListEl.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum aniversário de unção nos próximos 45 dias.</p>';
+        } else {
+          anointListEl.innerHTML = upcomingAnointings.map(u => {
+            const initials = u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+            const avatar = u.photo
+              ? `<img src="${u.photo}" class="w-9 h-9 rounded-full object-cover border border-indigo-200 shrink-0" />`
+              : `<div class="w-9 h-9 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">${initials}</div>`;
+            const isToday = u.diffDays === 0;
+            return `
+              <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl border ${isToday ? 'bg-indigo-50 border-indigo-300' : 'bg-slate-50 border-slate-200'}">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  ${avatar}
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(u.name)} <span class="font-semibold text-indigo-700">• ${escapeHtml(u.anointTitle)}</span></p>
+                    <p class="text-[11px] text-slate-500">🕊️ ${String(u.day).padStart(2, '0')}/${String(u.month).padStart(2, '0')}${u.years ? ` (${u.years} ${u.years === 1 ? 'ano' : 'anos'})` : ''}${u.anointPlace ? ' • ' + escapeHtml(u.anointPlace) : ''}</p>
+                  </div>
+                </div>
+                <div class="shrink-0">
+                  ${isToday ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-600 text-white">Hoje! 🕊️</span>' : formatCountdownPill(u.diffDays)}
                 </div>
               </div>
             `;
