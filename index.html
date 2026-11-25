@@ -14,14 +14,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            serif: ['Merriweather', 'Georgia', 'serif'],
+            display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            serif: ['Lora', 'Georgia', 'serif'],
+            sans: ['Lora', 'Georgia', 'serif'],
+            menu: ['Montserrat', 'system-ui', 'sans-serif'],
           },
           colors: {
             primary: {
@@ -42,9 +44,20 @@
       max-width: 100%;
     }
     body {
+      font-family: 'Lora', Georgia, serif;
       background-color: #F4F7FB;
       color: #0F172A;
       transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      letter-spacing: 0.01em;
+    }
+    nav, #nav-tabs-bar, .tab-btn, header button, button {
+      font-family: 'Montserrat', system-ui, sans-serif;
+    }
+    header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
     }
     button, a, select, input[type="checkbox"], input[type="radio"] {
       touch-action: manipulation;
